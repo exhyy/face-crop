@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from pathlib import Path
 
+import numpy as np
 from PIL import Image, UnidentifiedImageError
 
 from app.services.errors import BadRequestError, UnprocessableImageError
@@ -32,13 +35,20 @@ def ensure_supported_image_file(path: Path, *, code_prefix: str) -> Path:
 
 
 def verify_readable_image(path: Path, *, code_prefix: str) -> tuple[int, int]:
+    image = load_image_bgr(path, code_prefix=code_prefix)
+    height, width = image.shape[:2]
+    return width, height
+
+
+def load_image_bgr(path: Path, *, code_prefix: str) -> np.ndarray:
     try:
         with Image.open(path) as image:
-            image.verify()
-        with Image.open(path) as image:
-            return image.size
-    except (UnidentifiedImageError, OSError) as exc:
+            rgb_image = image.convert("RGB")
+            array = np.array(rgb_image, dtype=np.uint8)
+    except (UnidentifiedImageError, OSError, ValueError) as exc:
         raise UnprocessableImageError(
             f"invalid_{code_prefix}",
             f"{code_prefix.replace('_', ' ').capitalize()} is not a readable image.",
         ) from exc
+
+    return array[:, :, ::-1].copy()

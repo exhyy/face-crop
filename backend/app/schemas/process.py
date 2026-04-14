@@ -16,6 +16,7 @@ class ProcessResultItem(BaseModel):
     savedPath: str
     previewUrl: str | None = None
     faceBox: FaceBox | None = None
+    matchScore: float | None = None
 
 
 class ProcessRequest(BaseModel):
@@ -23,7 +24,8 @@ class ProcessRequest(BaseModel):
     candidateImagePaths: list[str] = Field(min_length=1)
     outputDir: str = Field(min_length=1)
     padding: int = Field(ge=0, le=10000)
-    matchMode: Literal["placeholder"] = "placeholder"
+    threshold: float = Field(default=0.75, ge=-1.0, le=1.0)
+    matchMode: Literal["real"] | None = None
 
     @field_validator("targetImagePath", "outputDir")
     @classmethod

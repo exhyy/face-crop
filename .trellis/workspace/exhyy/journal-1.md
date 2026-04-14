@@ -58,3 +58,63 @@ Bootstrapped the repo's Trellis and Claude workflow so future implementation wor
 ### Next Steps
 
 - None - task complete
+
+
+## Session 2: Build initial backend scaffold
+
+**Date**: 2026-04-14
+**Task**: Build initial backend scaffold
+
+### Summary
+
+(Add summary)
+
+### Main Changes
+
+| Area | Description |
+|------|-------------|
+| Backend | Added a local FastAPI backend scaffold under `backend/` with `GET /health` and `POST /process` |
+| Processing | Implemented placeholder image processing, structured errors, validation, logging, and collision-safe output writing |
+| Quality | Added backend tests, fixed local Pyright issues, and verified endpoints end-to-end with real requests |
+| Project hygiene | Ignored `.vscode/` and recorded the Trellis backend task files |
+
+**Updated Files**:
+- `backend/pyproject.toml`
+- `backend/requirements.txt`
+- `backend/app/main.py`
+- `backend/app/api/health.py`
+- `backend/app/api/process.py`
+- `backend/app/schemas/health.py`
+- `backend/app/schemas/process.py`
+- `backend/app/services/errors.py`
+- `backend/app/services/face_matching.py`
+- `backend/app/services/image_loading.py`
+- `backend/app/services/cropping.py`
+- `backend/app/services/output_writer.py`
+- `backend/app/utils/logging.py`
+- `backend/app/utils/paths.py`
+- `backend/tests/test_health.py`
+- `backend/tests/test_process.py`
+- `.gitignore`
+- `.trellis/tasks/archive/2026-04/04-14-backend-scaffold/*`
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `1c9db39` | (see git log) |
+| `4f8c14a` | (see git log) |
+| `afee66c` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

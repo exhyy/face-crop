@@ -1,0 +1,11 @@
+{"file": ".trellis/workflow.md", "reason": "Project workflow and conventions"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend development guide"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Frontend app structure"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Frontend component rules"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "Frontend hook rules"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Frontend state rules"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Frontend type rules"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Frontend quality rules"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Cross-layer frontend/backend contract review"}
+{"file": "backend/app/schemas/health.py", "reason": "Backend health response contract"}
+{"file": "backend/app/schemas/process.py", "reason": "Backend process request/response contracts"}

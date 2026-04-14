@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 3
-- **Last Active**: 2026-04-14
+- **Total Sessions**: 4
+- **Last Active**: 2026-04-15
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~172 | Active |
+| `journal-1.md` | ~222 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits |
 |---|------|-------|---------|
+| 4 | 2026-04-15 | Implement initial frontend app | `dd382d2` |
 | 3 | 2026-04-14 | Implement real backend face matching | `306107b`, `ad04c71` |
 | 2 | 2026-04-14 | Build initial backend scaffold | `1c9db39`, `4f8c14a`, `afee66c` |
 | 1 | 2026-04-14 | Bootstrap Trellis project guidance | `f0eec5d`, `9bf3bd1` |

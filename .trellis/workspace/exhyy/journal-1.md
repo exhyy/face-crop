@@ -170,3 +170,53 @@ Bootstrapped the repo's Trellis and Claude workflow so future implementation wor
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: Implement initial frontend app
+
+**Date**: 2026-04-15
+**Task**: Implement initial frontend app
+
+### Summary
+
+Added the first React/Vite frontend, connected it to backend health/process APIs, and enabled local frontend-backend integration with validation and checks.
+
+### Main Changes
+
+| Feature | Description |
+|---------|-------------|
+| Frontend app | Added a new Vite + React + TypeScript app under `frontend/` |
+| Face search UI | Built the initial single-page workflow for target path, candidate paths, output dir, threshold, padding, and match mode |
+| API integration | Added typed health/process API clients and feature hooks for request lifecycle handling |
+| Result rendering | Added processing status, summary metrics, and result list UI |
+| Validation | Added frontend form validation and unit tests for request mapping |
+| Backend integration | Enabled CORS in `backend/app/main.py` so the local frontend can call FastAPI |
+
+**Updated Files**:
+- `frontend/package.json`
+- `frontend/src/features/face-search/components/FaceSearchPage.tsx`
+- `frontend/src/features/face-search/components/SearchForm.tsx`
+- `frontend/src/features/face-search/hooks/useProcessFaces.ts`
+- `frontend/src/features/face-search/api/process.ts`
+- `frontend/src/features/face-search/utils/validation.ts`
+- `frontend/src/features/face-search/utils/validation.test.ts`
+- `backend/app/main.py`
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `dd382d2` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

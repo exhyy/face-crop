@@ -118,3 +118,55 @@ Bootstrapped the repo's Trellis and Claude workflow so future implementation wor
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: Implement real backend face matching
+
+**Date**: 2026-04-14
+**Task**: Implement real backend face matching
+
+### Summary
+
+(Add summary)
+
+### Main Changes
+
+| Area | Description |
+|------|-------------|
+| Backend | Replaced the placeholder `/process` flow with a real InsightFace-based local face detection, embedding matching, and crop saving pipeline |
+| Matching | Added threshold-based best-match selection, largest-target-face policy, and real cropped output generation |
+| Validation | Kept structured error responses and reused the existing filesystem/image validation helpers |
+| Quality | Updated backend tests, verified the new default threshold, and ran end-to-end checks with a real local image |
+| Project hygiene | Recorded and archived the Trellis task for the real backend implementation |
+
+**Updated Files**:
+- `backend/pyproject.toml`
+- `backend/requirements.txt`
+- `backend/app/core/config.py`
+- `backend/app/schemas/process.py`
+- `backend/app/services/cropping.py`
+- `backend/app/services/errors.py`
+- `backend/app/services/face_matching.py`
+- `backend/app/services/image_loading.py`
+- `backend/tests/test_process.py`
+- `.trellis/tasks/archive/2026-04/04-14-backend-real-impl/*`
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `306107b` | (see git log) |
+| `ad04c71` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

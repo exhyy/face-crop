@@ -220,3 +220,35 @@ Added the first React/Vite frontend, connected it to backend health/process APIs
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: Switch face processing to browser uploads
+
+**Date**: 2026-04-15
+**Task**: Switch face processing to browser uploads
+
+### Summary
+
+Reworked the app from backend path entry to browser file uploads, staged uploads into per-run backend directories under runs/, removed obsolete dialog/filesystem picker code, and updated frontend/backend tests plus gitignore.
+
+### Main Changes
+
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `a2cf426` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

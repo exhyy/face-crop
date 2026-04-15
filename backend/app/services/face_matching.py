@@ -10,7 +10,7 @@ from PIL import Image
 
 from app.core.config import get_settings
 from app.schemas.process import FaceBox, ProcessResponse, ProcessResultItem, ProcessingOptions, ProcessingPaths, TargetFaceDetectionResponse
-from app.services.cropping import ImageSize, expand_and_clip_face_box
+from app.services.cropping import ImageSize, expand_and_clip_face_box, square_face_box
 from app.services.errors import BadRequestError, InternalProcessingError
 from app.services.image_loading import load_image_bgr
 from app.services.output_writer import build_output_filename, ensure_collision_safe_path
@@ -151,8 +151,8 @@ class ProcessService:
             saved_path = self._save_crop(
                 source_path=candidate_path,
                 output_dir=paths.output_dir,
-                image=evaluation.matched_image,
-                face=evaluation.best_match.face,
+                image=candidate_image,
+                face_box=evaluation.original_face_box,
                 padding=options.padding,
             )
             matched_faces += 1
@@ -237,11 +237,15 @@ class ProcessService:
                 best_match = rotation_match
                 matched_image = rotated_image
                 rotation_applied = rotation
-                original_face_box = self._map_face_box_to_original(
-                    rotation_match.face,
-                    rotation=rotation,
-                    original_width=candidate_image.shape[1],
-                    original_height=candidate_image.shape[0],
+                original_face_box = self._square_original_face_box(
+                    self._map_face_box_to_original(
+                        rotation_match.face,
+                        rotation=rotation,
+                        original_width=candidate_image.shape[1],
+                        original_height=candidate_image.shape[0],
+                    ),
+                    image_width=candidate_image.shape[1],
+                    image_height=candidate_image.shape[0],
                 )
 
         return CandidateMatchEvaluation(
@@ -303,6 +307,9 @@ class ProcessService:
             )
         raise ValueError(f"Unsupported rotation angle: {rotation}")
 
+    def _square_original_face_box(self, face_box: FaceBox, *, image_width: int, image_height: int) -> FaceBox:
+        return square_face_box(face_box, image_size=ImageSize(width=image_width, height=image_height))
+
     def _find_best_match(
         self,
         target_face: DetectedFace,
@@ -324,10 +331,9 @@ class ProcessService:
         source_path: Path,
         output_dir: Path,
         image: np.ndarray,
-        face: DetectedFace,
+        face_box: FaceBox,
         padding: int,
     ) -> Path:
-        face_box = face.to_face_box()
         image_size = ImageSize(width=image.shape[1], height=image.shape[0])
         crop_bounds = expand_and_clip_face_box(face_box, image_size=image_size, padding=padding)
         cropped = image[crop_bounds.top:crop_bounds.bottom, crop_bounds.left:crop_bounds.right]

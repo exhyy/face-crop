@@ -145,6 +145,7 @@ def test_process_uses_selected_target_face_index(tmp_path: Path) -> None:
     assert payload["matchedFaces"] == 1
     assert payload["results"][0]["candidateIndex"] == 0
     assert payload["results"][0]["faceBox"] == {"top": 3, "right": 8, "bottom": 9, "left": 2}
+    assert payload["results"][0]["faceBox"]["right"] - payload["results"][0]["faceBox"]["left"] == payload["results"][0]["faceBox"]["bottom"] - payload["results"][0]["faceBox"]["top"]
     saved_image = Image.open(Path(payload["results"][0]["savedPath"]))
     assert saved_image.size == (6, 6)
 
@@ -214,6 +215,7 @@ def test_process_returns_real_best_match_crop(tmp_path: Path) -> None:
     assert payload["results"][0]["sourceFilename"] == "candidate.jpg"
     assert payload["results"][0]["matchScore"] == 1.0
     assert payload["results"][0]["faceBox"] == {"top": 4, "right": 15, "bottom": 14, "left": 5}
+    assert payload["results"][0]["faceBox"]["right"] - payload["results"][0]["faceBox"]["left"] == payload["results"][0]["faceBox"]["bottom"] - payload["results"][0]["faceBox"]["top"]
 
     saved_path = Path(payload["results"][0]["savedPath"])
     assert saved_path.exists()
@@ -249,7 +251,8 @@ def test_process_uses_rotated_candidate_match_when_enabled(tmp_path: Path) -> No
     payload = response.json()
     assert payload["detectedFaces"] == 1
     assert payload["matchedFaces"] == 1
-    assert payload["results"][0]["faceBox"] == {"top": 9, "right": 28, "bottom": 19, "left": 16}
+    assert payload["results"][0]["faceBox"] == {"top": 8, "right": 28, "bottom": 20, "left": 16}
+    assert payload["results"][0]["faceBox"]["right"] - payload["results"][0]["faceBox"]["left"] == payload["results"][0]["faceBox"]["bottom"] - payload["results"][0]["faceBox"]["top"]
     assert payload["results"][0]["rotationApplied"] == 90
 
 
@@ -311,6 +314,7 @@ def test_process_prefers_best_match_across_rotations(tmp_path: Path) -> None:
     assert payload["matchedFaces"] == 1
     assert payload["results"][0]["matchScore"] == 1.0
     assert payload["results"][0]["faceBox"] == {"top": 4, "right": 25, "bottom": 16, "left": 13}
+    assert payload["results"][0]["faceBox"]["right"] - payload["results"][0]["faceBox"]["left"] == payload["results"][0]["faceBox"]["bottom"] - payload["results"][0]["faceBox"]["top"]
     assert payload["results"][0]["rotationApplied"] == 90
 
 

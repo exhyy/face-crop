@@ -505,3 +505,45 @@ Replaced the dynamic Run summary panel with a static usage/help guide in the fac
 ### Next Steps
 
 - None - task complete
+
+
+## Session 12: Add bilingual README files
+
+**Date**: 2026-04-15
+**Task**: Add bilingual README files
+
+### Summary
+
+Added English and Chinese README files with installation, local usage, language switch links, and emoji-styled section headings.
+
+### Main Changes
+
+| Area | Description |
+|------|-------------|
+| Documentation | Added `README.md` in English and `README_cn.md` in Chinese |
+| Setup guide | Documented installation and local run commands for backend and frontend |
+| Usability | Added language switch links below the title in both README files |
+| Presentation | Unified the title as `Face Crop` and added emoji to all level-2 headings |
+
+**Updated Files**:
+- `README.md`
+- `README_cn.md`
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f1391ee` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

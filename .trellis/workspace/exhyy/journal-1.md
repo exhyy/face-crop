@@ -579,3 +579,48 @@ Added optional candidate auto-rotation matching, fixed rotated-match overlay coo
 ### Next Steps
 
 - None - task complete
+
+
+## Session 14: Square candidate boxes
+
+**Date**: 2026-04-15
+**Task**: Square candidate boxes
+
+### Summary
+
+Squared candidate face boxes and crops, then recorded the Trellis task artifacts.
+
+### Main Changes
+
+| Area | Description |
+|------|-------------|
+| Backend | Added square face-box normalization so candidate boxes expand the short side to match the long side in original-image coordinates |
+| Cropping | Reused the square face box for saved crops so overlays and crop outputs stay aligned |
+| Tests | Updated backend process tests to assert square face boxes, square crops, and rotated-match behavior |
+| Trellis | Archived the completed task and recorded its PRD/context artifacts |
+
+**Updated Files**:
+- `backend/app/services/cropping.py`
+- `backend/app/services/face_matching.py`
+- `backend/tests/test_process.py`
+- `.trellis/tasks/04-15-square-candidate-boxes/*`
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `9c4ac25` | (see git log) |
+| `e6489dc` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

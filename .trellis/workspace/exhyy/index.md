@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 13
+- **Total Sessions**: 14
 - **Last Active**: 2026-04-15
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~581 | Active |
+| `journal-1.md` | ~626 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits |
 |---|------|-------|---------|
+| 14 | 2026-04-15 | Square candidate boxes | `9c4ac25`, `e6489dc` |
 | 13 | 2026-04-15 | Add rotated candidate matching | `0a791bc` |
 | 12 | 2026-04-15 | Add bilingual README files | `f1391ee` |
 | 11 | 2026-04-15 | Replace run summary with usage guide | `5c63063` |

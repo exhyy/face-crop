@@ -13,6 +13,11 @@ class FaceBox(BaseModel):
     left: int
 
 
+class TargetFaceDetectionResponse(BaseModel):
+    faces: list[FaceBox]
+    defaultFaceIndex: int | None = None
+
+
 class ProcessResultItem(BaseModel):
     sourceFilename: str
     savedPath: str
@@ -43,6 +48,7 @@ class ProcessingOptions(BaseModel):
     padding: int = Field(ge=0, le=10000)
     threshold: float = Field(default=0.75, ge=-1.0, le=1.0)
     matchMode: Literal["real"] | None = None
+    selectedTargetFaceIndex: int | None = Field(default=None, ge=0)
 
 
 class ProcessingPaths(BaseModel):

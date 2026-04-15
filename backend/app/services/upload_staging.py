@@ -36,10 +36,11 @@ class UploadStagingService:
         *,
         target_image: UploadFile | None,
         candidate_images: list[UploadFile],
+        require_candidates: bool = True,
     ) -> ProcessingPaths:
         if target_image is None:
             raise BadRequestError("missing_target_image", "Target image is required.")
-        if not candidate_images:
+        if require_candidates and not candidate_images:
             raise BadRequestError("missing_candidate_image", "At least one candidate image is required.")
 
         staged_run = self._create_run_directories()

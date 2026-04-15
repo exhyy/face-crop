@@ -1,4 +1,4 @@
-import type { ProcessFormErrors, ProcessFormValues, ProcessResponse } from '../types/process'
+import type { ProcessFormErrors, ProcessFormValues, ProcessResponse, TargetFaceDetectionResponse } from '../types/process'
 
 export function validateProcessForm(values: ProcessFormValues): ProcessFormErrors {
   const errors: ProcessFormErrors = {}
@@ -39,6 +39,7 @@ export function createDefaultFormValues(): ProcessFormValues {
     padding: '0',
     threshold: '0.75',
     matchMode: '',
+    selectedTargetFaceIndex: null,
   }
 }
 
@@ -60,7 +61,39 @@ export function createProcessFormData(values: ProcessFormValues): FormData {
     formData.append('matchMode', 'real')
   }
 
+  if (values.selectedTargetFaceIndex !== null) {
+    formData.append('selectedTargetFaceIndex', String(values.selectedTargetFaceIndex))
+  }
+
   return formData
+}
+
+export function isTargetFaceDetectionResponse(value: unknown): value is TargetFaceDetectionResponse {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const record = value as Record<string, unknown>
+  if (!Array.isArray(record.faces)) {
+    return false
+  }
+
+  return (
+    (record.defaultFaceIndex === null || typeof record.defaultFaceIndex === 'number') &&
+    record.faces.every((face) => {
+      if (typeof face !== 'object' || face === null) {
+        return false
+      }
+
+      const faceRecord = face as Record<string, unknown>
+      return (
+        typeof faceRecord.top === 'number' &&
+        typeof faceRecord.right === 'number' &&
+        typeof faceRecord.bottom === 'number' &&
+        typeof faceRecord.left === 'number'
+      )
+    })
+  )
 }
 
 export function isProcessResponse(value: unknown): value is ProcessResponse {

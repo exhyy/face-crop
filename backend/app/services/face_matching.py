@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 
 from app.core.config import get_settings
-from app.schemas.process import FaceBox, ProcessResponse, ProcessResultItem, ProcessingOptions, ProcessingPaths
+from app.schemas.process import FaceBox, ProcessResponse, ProcessResultItem, ProcessingOptions, ProcessingPaths, TargetFaceDetectionResponse
 from app.services.cropping import ImageSize, expand_and_clip_face_box
 from app.services.errors import BadRequestError, InternalProcessingError
 from app.services.image_loading import load_image_bgr
@@ -103,20 +103,24 @@ class ProcessService:
     def __init__(self, *, face_engine: FaceEngine | None = None) -> None:
         self._face_engine = face_engine or InsightFaceEngine()
 
+    def detect_target_faces(self, target_image_path: Path) -> TargetFaceDetectionResponse:
+        target_image = load_image_bgr(target_image_path, code_prefix="target_image")
+        target_faces = self._face_engine.detect_faces(target_image)
+        if not target_faces:
+            raise BadRequestError("no_target_face", "No face detected in the target image.")
+
+        return TargetFaceDetectionResponse(
+            faces=[face.to_face_box() for face in target_faces],
+            defaultFaceIndex=self._select_largest_face_index(target_faces),
+        )
+
     def process_paths(self, paths: ProcessingPaths, options: ProcessingOptions) -> ProcessResponse:
         logger.info(
             "processing started",
             extra={"total_images": len(paths.candidate_images), "output_dir": str(paths.output_dir), "run_id": paths.run_id},
         )
 
-        target_image = load_image_bgr(paths.target_image, code_prefix="target_image")
-        target_faces = self._face_engine.detect_faces(target_image)
-        if not target_faces:
-            raise BadRequestError("no_target_face", "No face detected in the target image.")
-        if len(target_faces) > 1:
-            logger.warning("multiple target faces detected; using largest face")
-
-        target_face = self._select_largest_face(target_faces)
+        target_face = self._resolve_target_face(paths.target_image, selected_index=options.selectedTargetFaceIndex)
 
         results: list[ProcessResultItem] = []
         detected_faces = 0
@@ -166,8 +170,30 @@ class ProcessService:
             results=results,
         )
 
+    def _detect_target_faces(self, target_image_path: Path) -> list[DetectedFace]:
+        target_image = load_image_bgr(target_image_path, code_prefix="target_image")
+        target_faces = self._face_engine.detect_faces(target_image)
+        if not target_faces:
+            raise BadRequestError("no_target_face", "No face detected in the target image.")
+        return target_faces
+
+    def _resolve_target_face(self, target_image_path: Path, *, selected_index: int | None) -> DetectedFace:
+        target_faces = self._detect_target_faces(target_image_path)
+        if len(target_faces) > 1 and selected_index is None:
+            logger.warning("multiple target faces detected; using largest face")
+
+        if selected_index is not None:
+            if selected_index >= len(target_faces):
+                raise BadRequestError("invalid_target_face_index", "Selected target face is out of range.")
+            return target_faces[selected_index]
+
+        return self._select_largest_face(target_faces)
+
     def _select_largest_face(self, faces: list[DetectedFace]) -> DetectedFace:
-        return max(faces, key=lambda face: face.area)
+        return faces[self._select_largest_face_index(faces)]
+
+    def _select_largest_face_index(self, faces: list[DetectedFace]) -> int:
+        return max(range(len(faces)), key=lambda index: faces[index].area)
 
     def _find_best_match(
         self,

@@ -10,6 +10,11 @@ export interface FaceBox {
   left: number
 }
 
+export interface TargetFaceDetectionResponse {
+  faces: FaceBox[]
+  defaultFaceIndex: number | null
+}
+
 export interface ProcessResultItem {
   sourceFilename: string
   savedPath: string
@@ -35,6 +40,7 @@ export interface ErrorResponse {
 }
 
 export type ProcessStatus = 'idle' | 'submitting' | 'success' | 'error'
+export type TargetFaceDetectionStatus = 'idle' | 'loading' | 'success' | 'error'
 
 export interface ProcessFormValues {
   targetFile: File | null
@@ -42,6 +48,7 @@ export interface ProcessFormValues {
   padding: string
   threshold: string
   matchMode: '' | 'real'
+  selectedTargetFaceIndex: number | null
 }
 
 export interface ProcessFormErrors {

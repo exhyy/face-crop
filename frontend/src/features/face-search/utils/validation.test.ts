@@ -23,6 +23,7 @@ describe('validateProcessForm', () => {
       padding: '2',
       threshold: '0.9',
       matchMode: 'real' as const,
+      selectedTargetFaceIndex: 1,
     }
 
     expect(validateProcessForm(values)).toEqual({})

@@ -1,7 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 
-import type { ProcessFormErrors, ProcessFormValues } from '../types/process'
+import { detectTargetFaces } from '../api/process'
+import { TargetImagePreview } from './TargetImagePreview'
+import type {
+  FaceBox,
+  ProcessFormErrors,
+  ProcessFormValues,
+  TargetFaceDetectionStatus,
+} from '../types/process'
 import { createDefaultFormValues } from '../utils/validation'
 
 interface SearchFormProps {
@@ -12,6 +19,18 @@ interface SearchFormProps {
 
 export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFormProps) {
   const [values, setValues] = useState<ProcessFormValues>(createDefaultFormValues)
+  const [targetPreviewUrl, setTargetPreviewUrl] = useState<string | null>(null)
+  const [detectedFaces, setDetectedFaces] = useState<FaceBox[]>([])
+  const [targetFaceStatus, setTargetFaceStatus] = useState<TargetFaceDetectionStatus>('idle')
+  const [targetFaceError, setTargetFaceError] = useState<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (targetPreviewUrl) {
+        URL.revokeObjectURL(targetPreviewUrl)
+      }
+    }
+  }, [targetPreviewUrl])
 
   const updateField = <T extends keyof ProcessFormValues>(field: T, value: ProcessFormValues[T]) => {
     setValues((current) => ({ ...current, [field]: value }))
@@ -22,12 +41,46 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFor
       updateField(field, event.target.value as ProcessFormValues[typeof field])
     }
 
-  const handleTargetFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateField('targetFile', event.target.files?.[0] ?? null)
+  const handleTargetFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const nextTargetFile = event.target.files?.[0] ?? null
+
+    if (targetPreviewUrl) {
+      URL.revokeObjectURL(targetPreviewUrl)
+    }
+
+    updateField('targetFile', nextTargetFile)
+    updateField('selectedTargetFaceIndex', null)
+    setDetectedFaces([])
+    setTargetFaceError(null)
+
+    if (nextTargetFile === null) {
+      setTargetPreviewUrl(null)
+      setTargetFaceStatus('idle')
+      return
+    }
+
+    setTargetPreviewUrl(URL.createObjectURL(nextTargetFile))
+    setTargetFaceStatus('loading')
+
+    try {
+      const response = await detectTargetFaces(nextTargetFile)
+      setDetectedFaces(response.faces)
+      updateField('selectedTargetFaceIndex', response.defaultFaceIndex)
+      setTargetFaceStatus('success')
+    } catch (error) {
+      setDetectedFaces([])
+      updateField('selectedTargetFaceIndex', null)
+      setTargetFaceStatus('error')
+      setTargetFaceError(error instanceof Error ? error.message : 'Unable to detect faces in the target image.')
+    }
   }
 
   const handleCandidateFilesChange = (event: ChangeEvent<HTMLInputElement>) => {
     updateField('candidateFiles', Array.from(event.target.files ?? []))
+  }
+
+  const handleSelectTargetFace = (index: number) => {
+    updateField('selectedTargetFaceIndex', index)
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -57,6 +110,16 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFor
               <span className="selection-summary__label">Selected</span>
               <span className="selection-summary__value">{values.targetFile ? values.targetFile.name : 'None'}</span>
             </div>
+            {targetPreviewUrl ? (
+              <TargetImagePreview
+                previewUrl={targetPreviewUrl}
+                faces={detectedFaces}
+                selectedFaceIndex={values.selectedTargetFaceIndex}
+                onSelectFace={handleSelectTargetFace}
+                status={targetFaceStatus}
+                error={targetFaceError}
+              />
+            ) : null}
             {externalErrors.targetFile ? <p className="error-text">{externalErrors.targetFile}</p> : null}
           </div>
         </div>

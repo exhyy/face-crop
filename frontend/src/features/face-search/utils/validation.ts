@@ -1,27 +1,16 @@
-import type { ProcessFormErrors, ProcessFormValues, ProcessRequest } from '../types/process'
-
-function parseCandidatePaths(value: string): string[] {
-  return value
-    .split(/\r?\n|,/)
-    .map((item) => item.trim())
-    .filter(Boolean)
-}
+import type { ProcessFormErrors, ProcessFormValues, ProcessResponse } from '../types/process'
 
 export function validateProcessForm(values: ProcessFormValues): ProcessFormErrors {
   const errors: ProcessFormErrors = {}
   const paddingValue = Number(values.padding)
   const thresholdValue = Number(values.threshold)
 
-  if (!values.targetImagePath.trim()) {
-    errors.targetImagePath = 'Target image path is required.'
+  if (values.targetFile === null) {
+    errors.targetFile = 'Target image is required.'
   }
 
-  if (parseCandidatePaths(values.candidateImagePathsText).length === 0) {
-    errors.candidateImagePathsText = 'At least one candidate image path is required.'
-  }
-
-  if (!values.outputDir.trim()) {
-    errors.outputDir = 'Output directory is required.'
+  if (values.candidateFiles.length === 0) {
+    errors.candidateFiles = 'At least one candidate image is required.'
   }
 
   if (!Number.isFinite(paddingValue) || !Number.isInteger(paddingValue) || paddingValue < 0) {
@@ -43,29 +32,74 @@ export function hasProcessFormErrors(errors: ProcessFormErrors): boolean {
   return Object.values(errors).some(Boolean)
 }
 
-export function toProcessRequest(values: ProcessFormValues): ProcessRequest {
-  const request: ProcessRequest = {
-    targetImagePath: values.targetImagePath.trim(),
-    candidateImagePaths: parseCandidatePaths(values.candidateImagePathsText),
-    outputDir: values.outputDir.trim(),
-    padding: Number(values.padding),
-    threshold: Number(values.threshold),
-  }
-
-  if (values.matchMode === 'real') {
-    request.matchMode = 'real'
-  }
-
-  return request
-}
-
 export function createDefaultFormValues(): ProcessFormValues {
   return {
-    targetImagePath: '',
-    candidateImagePathsText: '',
-    outputDir: '',
+    targetFile: null,
+    candidateFiles: [],
     padding: '0',
     threshold: '0.75',
     matchMode: '',
   }
+}
+
+export function createProcessFormData(values: ProcessFormValues): FormData {
+  const formData = new FormData()
+
+  if (values.targetFile) {
+    formData.append('targetImage', values.targetFile)
+  }
+
+  for (const file of values.candidateFiles) {
+    formData.append('candidateImages', file)
+  }
+
+  formData.append('padding', values.padding)
+  formData.append('threshold', values.threshold)
+
+  if (values.matchMode === 'real') {
+    formData.append('matchMode', 'real')
+  }
+
+  return formData
+}
+
+export function isProcessResponse(value: unknown): value is ProcessResponse {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const record = value as Record<string, unknown>
+  if (
+    typeof record.totalImages !== 'number' ||
+    typeof record.detectedFaces !== 'number' ||
+    typeof record.matchedFaces !== 'number' ||
+    typeof record.runId !== 'string' ||
+    typeof record.outputDirectory !== 'string' ||
+    !Array.isArray(record.results)
+  ) {
+    return false
+  }
+
+  return record.results.every((item) => {
+    if (typeof item !== 'object' || item === null) {
+      return false
+    }
+
+    const resultRecord = item as Record<string, unknown>
+
+    const faceBox = resultRecord.faceBox as Record<string, unknown> | null | undefined
+
+    return (
+      typeof resultRecord.sourceFilename === 'string' &&
+      typeof resultRecord.savedPath === 'string' &&
+      (resultRecord.previewUrl === null || typeof resultRecord.previewUrl === 'string' || resultRecord.previewUrl === undefined) &&
+      (faceBox === null ||
+        faceBox === undefined ||
+        (typeof faceBox.top === 'number' &&
+          typeof faceBox.right === 'number' &&
+          typeof faceBox.bottom === 'number' &&
+          typeof faceBox.left === 'number')) &&
+      (resultRecord.matchScore === null || resultRecord.matchScore === undefined || typeof resultRecord.matchScore === 'number')
+    )
+  })
 }

@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import BaseModel
 
@@ -9,6 +10,7 @@ class Settings(BaseModel):
     insightface_model_name: str = "buffalo_l"
     insightface_detection_size: tuple[int, int] = (640, 640)
     insightface_allowed_providers: tuple[str, ...] = ("CPUExecutionProvider",)
+    service_output_base_dir: Path = Path("./runs")
 
 
 @lru_cache(maxsize=1)

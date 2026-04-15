@@ -18,19 +18,12 @@ export interface ProcessResultItem {
   matchScore?: number | null
 }
 
-export interface ProcessRequest {
-  targetImagePath: string
-  candidateImagePaths: string[]
-  outputDir: string
-  padding: number
-  threshold: number
-  matchMode?: 'real'
-}
-
 export interface ProcessResponse {
   totalImages: number
   detectedFaces: number
   matchedFaces: number
+  runId: string
+  outputDirectory: string
   results: ProcessResultItem[]
 }
 
@@ -44,18 +37,16 @@ export interface ErrorResponse {
 export type ProcessStatus = 'idle' | 'submitting' | 'success' | 'error'
 
 export interface ProcessFormValues {
-  targetImagePath: string
-  candidateImagePathsText: string
-  outputDir: string
+  targetFile: File | null
+  candidateFiles: File[]
   padding: string
   threshold: string
   matchMode: '' | 'real'
 }
 
 export interface ProcessFormErrors {
-  targetImagePath?: string
-  candidateImagePathsText?: string
-  outputDir?: string
+  targetFile?: string
+  candidateFiles?: string
   padding?: string
   threshold?: string
   matchMode?: string

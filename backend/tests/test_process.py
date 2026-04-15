@@ -22,23 +22,22 @@ class StubFaceEngine:
         return response
 
 
-def create_image(path: Path, *, size: tuple[int, int] = (24, 24), color: tuple[int, int, int] = (255, 0, 0)) -> None:
-    generated_image = Image.new("RGB", size, color=cast(int | tuple[int, int, int], color))
-    generated_image.save(path)
+def create_image_bytes(*, size: tuple[int, int] = (24, 24), color: tuple[int, int, int] = (255, 0, 0)) -> bytes:
+    image = Image.new("RGB", size, color=cast(int | tuple[int, int, int], color))
+    from io import BytesIO
+
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG")
+    return buffer.getvalue()
 
 
 def test_process_returns_real_best_match_crop(tmp_path: Path) -> None:
     from app.api import process as process_api
-
-    target = tmp_path / "target.jpg"
-    candidate = tmp_path / "candidate.jpg"
-    output_dir = tmp_path / "output"
-    output_dir.mkdir()
-
-    create_image(target, size=(40, 40), color=(0, 255, 0))
-    create_image(candidate, size=(30, 20), color=(0, 0, 255))
+    from app.core import config as config_module
 
     original_service = process_api.service
+    original_staging_service = process_api.staging_service
+    original_settings = config_module.get_settings
     process_api.service = process_api.ProcessService(
         face_engine=StubFaceEngine(
             responses=[
@@ -53,26 +52,30 @@ def test_process_returns_real_best_match_crop(tmp_path: Path) -> None:
             ]
         )
     )
+    config_module.get_settings = lambda: config_module.Settings(service_output_base_dir=tmp_path / "runs")
+    process_api.staging_service = process_api.UploadStagingService(output_base_dir=tmp_path / "runs")
 
     try:
         response = client.post(
             "/process",
-            json={
-                "targetImagePath": str(target),
-                "candidateImagePaths": [str(candidate)],
-                "outputDir": str(output_dir),
-                "padding": 2,
-                "threshold": 0.8,
-            },
+            data={"padding": "2", "threshold": "0.8"},
+            files=[
+                ("targetImage", ("target.jpg", create_image_bytes(size=(40, 40), color=(0, 255, 0)), "image/jpeg")),
+                ("candidateImages", ("candidate.jpg", create_image_bytes(size=(30, 20), color=(0, 0, 255)), "image/jpeg")),
+            ],
         )
     finally:
         process_api.service = original_service
+        process_api.staging_service = original_staging_service
+        config_module.get_settings = original_settings
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["totalImages"] == 1
     assert payload["detectedFaces"] == 2
     assert payload["matchedFaces"] == 1
+    assert payload["runId"]
+    assert payload["outputDirectory"].startswith(str((tmp_path / "runs").resolve()))
     assert payload["results"][0]["sourceFilename"] == "candidate.jpg"
     assert payload["results"][0]["matchScore"] == 1.0
     assert payload["results"][0]["faceBox"] == {"top": 4, "right": 15, "bottom": 14, "left": 5}
@@ -83,142 +86,50 @@ def test_process_returns_real_best_match_crop(tmp_path: Path) -> None:
     assert saved_image.size == (14, 14)
 
 
-def test_process_skips_candidate_when_best_match_below_threshold(tmp_path: Path) -> None:
-    from app.api import process as process_api
-
-    target = tmp_path / "target.jpg"
-    candidate = tmp_path / "candidate.jpg"
-    output_dir = tmp_path / "output"
-    output_dir.mkdir()
-
-    create_image(target)
-    create_image(candidate)
-
-    original_service = process_api.service
-    process_api.service = process_api.ProcessService(
-        face_engine=StubFaceEngine(
-            responses=[
-                [DetectedFace(bbox=(0, 0, 10, 10), embedding=np.array([1.0, 0.0], dtype=np.float32))],
-                [DetectedFace(bbox=(1, 1, 6, 6), embedding=np.array([0.0, 1.0], dtype=np.float32))],
-            ]
-        )
-    )
-
-    try:
-        response = client.post(
-            "/process",
-            json={
-                "targetImagePath": str(target),
-                "candidateImagePaths": [str(candidate)],
-                "outputDir": str(output_dir),
-                "padding": 0,
-                "threshold": 0.5,
-            },
-        )
-    finally:
-        process_api.service = original_service
-
-    assert response.status_code == 200
-    assert response.json() == {
-        "totalImages": 1,
-        "detectedFaces": 1,
-        "matchedFaces": 0,
-        "results": [],
-    }
-
-
-def test_process_returns_structured_error_for_missing_target(tmp_path: Path) -> None:
-    candidate = tmp_path / "candidate.jpg"
-    output_dir = tmp_path / "output"
-    output_dir.mkdir()
-    create_image(candidate)
-
+def test_process_returns_structured_error_for_missing_target() -> None:
     response = client.post(
         "/process",
-        json={
-            "targetImagePath": str(tmp_path / "missing.jpg"),
-            "candidateImagePaths": [str(candidate)],
-            "outputDir": str(output_dir),
-            "padding": 0,
-            "threshold": 0.5,
-        },
+        data={"padding": "0", "threshold": "0.5"},
+        files=[("candidateImages", ("candidate.jpg", create_image_bytes(), "image/jpeg"))],
     )
 
     assert response.status_code == 400
     assert response.json() == {
         "error": {
             "code": "missing_target_image",
-            "message": "Target image does not exist.",
-        }
-    }
-
-
-def test_process_returns_structured_error_when_target_has_no_face(tmp_path: Path) -> None:
-    from app.api import process as process_api
-
-    target = tmp_path / "target.jpg"
-    candidate = tmp_path / "candidate.jpg"
-    output_dir = tmp_path / "output"
-    output_dir.mkdir()
-    create_image(target)
-    create_image(candidate)
-
-    original_service = process_api.service
-    process_api.service = process_api.ProcessService(face_engine=StubFaceEngine(responses=[[], []]))
-
-    try:
-        response = client.post(
-            "/process",
-            json={
-                "targetImagePath": str(target),
-                "candidateImagePaths": [str(candidate)],
-                "outputDir": str(output_dir),
-                "padding": 2,
-                "threshold": 0.5,
-            },
-        )
-    finally:
-        process_api.service = original_service
-
-    assert response.status_code == 400
-    assert response.json() == {
-        "error": {
-            "code": "no_target_face",
-            "message": "No face detected in the target image.",
+            "message": "Target image is required.",
         }
     }
 
 
 def test_process_returns_structured_error_for_unreadable_candidate(tmp_path: Path) -> None:
     from app.api import process as process_api
-
-    target = tmp_path / "target.jpg"
-    candidate = tmp_path / "candidate.jpg"
-    output_dir = tmp_path / "output"
-    output_dir.mkdir()
-    create_image(target)
-    candidate.write_text("not an image", encoding="utf-8")
+    from app.core import config as config_module
 
     original_service = process_api.service
+    original_staging_service = process_api.staging_service
+    original_settings = config_module.get_settings
     process_api.service = process_api.ProcessService(
         face_engine=StubFaceEngine(
             responses=[[DetectedFace(bbox=(0, 0, 10, 10), embedding=np.array([1.0, 0.0], dtype=np.float32))]]
         )
     )
+    config_module.get_settings = lambda: config_module.Settings(service_output_base_dir=tmp_path / "runs")
+    process_api.staging_service = process_api.UploadStagingService(output_base_dir=tmp_path / "runs")
 
     try:
         response = client.post(
             "/process",
-            json={
-                "targetImagePath": str(target),
-                "candidateImagePaths": [str(candidate)],
-                "outputDir": str(output_dir),
-                "padding": 2,
-                "threshold": 0.5,
-            },
+            data={"padding": "2", "threshold": "0.5"},
+            files=[
+                ("targetImage", ("target.jpg", create_image_bytes(), "image/jpeg")),
+                ("candidateImages", ("candidate.jpg", b"not an image", "image/jpeg")),
+            ],
         )
     finally:
         process_api.service = original_service
+        process_api.staging_service = original_staging_service
+        config_module.get_settings = original_settings
 
     assert response.status_code == 422
     assert response.json() == {

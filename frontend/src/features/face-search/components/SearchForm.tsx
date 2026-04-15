@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 
 import type { ProcessFormErrors, ProcessFormValues } from '../types/process'
@@ -13,21 +13,22 @@ interface SearchFormProps {
 export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFormProps) {
   const [values, setValues] = useState<ProcessFormValues>(createDefaultFormValues)
 
-  const candidateCount = useMemo(() => {
-    return values.candidateImagePathsText
-      .split(/\r?\n|,/)
-      .map((item) => item.trim())
-      .filter(Boolean).length
-  }, [values.candidateImagePathsText])
-
   const updateField = <T extends keyof ProcessFormValues>(field: T, value: ProcessFormValues[T]) => {
     setValues((current) => ({ ...current, [field]: value }))
   }
 
   const handleInputChange =
-    (field: keyof ProcessFormValues) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    (field: 'padding' | 'threshold' | 'matchMode') => (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       updateField(field, event.target.value as ProcessFormValues[typeof field])
     }
+
+  const handleTargetFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    updateField('targetFile', event.target.files?.[0] ?? null)
+  }
+
+  const handleCandidateFilesChange = (event: ChangeEvent<HTMLInputElement>) => {
+    updateField('candidateFiles', Array.from(event.target.files ?? []))
+  }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -39,42 +40,26 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFor
       <h2>Search request</h2>
       <form className="form-grid" onSubmit={handleSubmit} noValidate>
         <div className="form-row">
-          <label htmlFor="targetImagePath">Target image path</label>
-          <input
-            id="targetImagePath"
-            name="targetImagePath"
-            value={values.targetImagePath}
-            onChange={handleInputChange('targetImagePath')}
-            placeholder="/absolute/path/to/target.jpg"
-          />
-          <p className="help-text">Provide the target image path expected by the backend.</p>
-          {externalErrors.targetImagePath ? <p className="error-text">{externalErrors.targetImagePath}</p> : null}
+          <label htmlFor="targetFile">Target image</label>
+          <input id="targetFile" name="targetFile" type="file" accept="image/*" onChange={handleTargetFileChange} />
+          <p className="help-text">Choose the target image from your local device.</p>
+          {values.targetFile ? <p className="help-text">Selected: {values.targetFile.name}</p> : null}
+          {externalErrors.targetFile ? <p className="error-text">{externalErrors.targetFile}</p> : null}
         </div>
 
         <div className="form-row">
-          <label htmlFor="candidateImagePathsText">Candidate image paths</label>
-          <textarea
-            id="candidateImagePathsText"
-            name="candidateImagePathsText"
-            value={values.candidateImagePathsText}
-            onChange={handleInputChange('candidateImagePathsText')}
-            placeholder="/absolute/path/to/candidate-1.jpg&#10;/absolute/path/to/candidate-2.jpg"
-          />
-          <p className="help-text">Enter one path per line or separate entries with commas. Current count: {candidateCount}.</p>
-          {externalErrors.candidateImagePathsText ? <p className="error-text">{externalErrors.candidateImagePathsText}</p> : null}
-        </div>
-
-        <div className="form-row">
-          <label htmlFor="outputDir">Output directory</label>
-          <input
-            id="outputDir"
-            name="outputDir"
-            value={values.outputDir}
-            onChange={handleInputChange('outputDir')}
-            placeholder="/absolute/path/to/output"
-          />
-          <p className="help-text">The directory must already exist on the backend host.</p>
-          {externalErrors.outputDir ? <p className="error-text">{externalErrors.outputDir}</p> : null}
+          <label htmlFor="candidateFiles">Candidate images</label>
+          <input id="candidateFiles" name="candidateFiles" type="file" accept="image/*" multiple onChange={handleCandidateFilesChange} />
+          <p className="help-text">Choose one or more candidate images from your local device.</p>
+          <p className="help-text">Selected files: {values.candidateFiles.length}</p>
+          {values.candidateFiles.length > 0 ? (
+            <ul className="selected-file-list">
+              {values.candidateFiles.map((file) => (
+                <li key={`${file.name}-${file.lastModified}`}>{file.name}</li>
+              ))}
+            </ul>
+          ) : null}
+          {externalErrors.candidateFiles ? <p className="error-text">{externalErrors.candidateFiles}</p> : null}
         </div>
 
         <div className="form-row form-row--inline">
@@ -108,7 +93,7 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFor
 
         <div className="actions">
           <button className="button button--primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Processing...' : 'Process images'}
+            {isSubmitting ? 'Processing...' : 'Upload and process'}
           </button>
         </div>
       </form>

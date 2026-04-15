@@ -8,7 +8,7 @@ import { SearchForm } from './SearchForm'
 import { useHealthCheck } from '../hooks/useHealthCheck'
 import { useProcessFaces } from '../hooks/useProcessFaces'
 import type { ProcessFormErrors, ProcessFormValues } from '../types/process'
-import { hasProcessFormErrors, toProcessRequest, validateProcessForm } from '../utils/validation'
+import { hasProcessFormErrors, validateProcessForm } from '../utils/validation'
 
 export function FaceSearchPage() {
   const health = useHealthCheck()
@@ -23,7 +23,7 @@ export function FaceSearchPage() {
       return
     }
 
-    await processFaces.run(toProcessRequest(values))
+    await processFaces.run(values)
   }
 
   return (
@@ -31,7 +31,7 @@ export function FaceSearchPage() {
       <header className="page__header">
         <h1 className="page__title">Face Crop Frontend</h1>
         <p className="page__description">
-          Submit local image paths to the backend, then review processing status, summary metrics, and saved outputs.
+          Upload local images to the backend, then review processing status, summary metrics, and saved outputs.
         </p>
       </header>
 

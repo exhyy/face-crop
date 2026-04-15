@@ -9,15 +9,10 @@ import numpy as np
 from PIL import Image
 
 from app.core.config import get_settings
-from app.schemas.process import FaceBox, ProcessRequest, ProcessResponse, ProcessResultItem, ProcessingPaths
+from app.schemas.process import FaceBox, ProcessResponse, ProcessResultItem, ProcessingOptions, ProcessingPaths
 from app.services.cropping import ImageSize, expand_and_clip_face_box
 from app.services.errors import BadRequestError, InternalProcessingError
-from app.services.image_loading import (
-    ensure_existing_directory,
-    ensure_existing_file,
-    ensure_supported_image_file,
-    load_image_bgr,
-)
+from app.services.image_loading import load_image_bgr
 from app.services.output_writer import build_output_filename, ensure_collision_safe_path
 
 logger = logging.getLogger(__name__)
@@ -108,11 +103,10 @@ class ProcessService:
     def __init__(self, *, face_engine: FaceEngine | None = None) -> None:
         self._face_engine = face_engine or InsightFaceEngine()
 
-    def process(self, request: ProcessRequest) -> ProcessResponse:
-        paths = self._validate_paths(request)
+    def process_paths(self, paths: ProcessingPaths, options: ProcessingOptions) -> ProcessResponse:
         logger.info(
             "processing started",
-            extra={"total_images": len(paths.candidate_images), "output_dir": str(paths.output_dir)},
+            extra={"total_images": len(paths.candidate_images), "output_dir": str(paths.output_dir), "run_id": paths.run_id},
         )
 
         target_image = load_image_bgr(paths.target_image, code_prefix="target_image")
@@ -133,7 +127,7 @@ class ProcessService:
             candidate_faces = self._face_engine.detect_faces(candidate_image)
             detected_faces += len(candidate_faces)
 
-            best_match = self._find_best_match(target_face, candidate_faces, request.threshold)
+            best_match = self._find_best_match(target_face, candidate_faces, options.threshold)
             if best_match is None:
                 continue
 
@@ -142,7 +136,7 @@ class ProcessService:
                 output_dir=paths.output_dir,
                 image=candidate_image,
                 face=best_match.face,
-                padding=request.padding,
+                padding=options.padding,
             )
             matched_faces += 1
             results.append(
@@ -160,31 +154,17 @@ class ProcessService:
                 "total_images": len(paths.candidate_images),
                 "matched_faces": matched_faces,
                 "output_dir": str(paths.output_dir),
+                "run_id": paths.run_id,
             },
         )
         return ProcessResponse(
             totalImages=len(paths.candidate_images),
             detectedFaces=detected_faces,
             matchedFaces=matched_faces,
+            runId=paths.run_id,
+            outputDirectory=str(paths.output_dir),
             results=results,
         )
-
-    def _validate_paths(self, request: ProcessRequest) -> ProcessingPaths:
-        target_image = ensure_supported_image_file(
-            ensure_existing_file(Path(request.targetImagePath).expanduser(), field_name="target_image"),
-            code_prefix="target_image",
-        )
-        output_dir = ensure_existing_directory(Path(request.outputDir).expanduser())
-
-        candidate_images: list[Path] = []
-        for value in request.candidateImagePaths:
-            candidate_path = ensure_supported_image_file(
-                ensure_existing_file(Path(value).expanduser(), field_name="candidate_image"),
-                code_prefix="candidate_image",
-            )
-            candidate_images.append(candidate_path)
-
-        return ProcessingPaths(target_image=target_image, candidate_images=candidate_images, output_dir=output_dir)
 
     def _select_largest_face(self, faces: list[DetectedFace]) -> DetectedFace:
         return max(faces, key=lambda face: face.area)

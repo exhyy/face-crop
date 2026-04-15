@@ -41,12 +41,15 @@ export async function requestJson<TResponse>(
   init?: RequestInit,
   validate?: (value: unknown) => value is TResponse,
 ): Promise<TResponse> {
+  const headers = new Headers(init?.headers ?? {})
+
+  if (!(init?.body instanceof FormData) && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+
   const response = await fetch(`${getBaseUrl()}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
     ...init,
+    headers,
   })
 
   const data: unknown = await response.json().catch(() => null)

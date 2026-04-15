@@ -331,3 +331,59 @@ Added target image preview with backend face detection, selectable target face b
 ### Next Steps
 
 - None - task complete
+
+
+## Session 8: Enhance candidate preview workflow
+
+**Date**: 2026-04-15
+**Task**: Enhance candidate preview workflow
+
+### Summary
+
+(Add summary)
+
+### Main Changes
+
+| Area | Description |
+|------|-------------|
+| Candidate preview | Added large preview with thumbnail switching for candidate images |
+| Match visualization | Reused target-style face highlighting on candidate previews after search |
+| Downloads | Added backend zip endpoint and frontend download action for all saved crops |
+| UX polish | Improved settings cards, moved the download button next to Run search, removed candidate filename list, lowered default threshold to 0.6, and added empty-result guidance |
+| Backend | Added candidateIndex in process results and expanded CORS for local dev ports |
+
+**Updated Files**:
+- `backend/app/api/process.py`
+- `backend/app/main.py`
+- `backend/app/schemas/process.py`
+- `backend/app/services/crop_archive.py`
+- `backend/app/services/face_matching.py`
+- `backend/tests/test_process.py`
+- `frontend/src/features/face-search/api/process.ts`
+- `frontend/src/features/face-search/components/CropResultList.tsx`
+- `frontend/src/features/face-search/components/FaceOverlayPreview.tsx`
+- `frontend/src/features/face-search/components/FaceSearchPage.tsx`
+- `frontend/src/features/face-search/components/SearchForm.tsx`
+- `frontend/src/features/face-search/components/TargetImagePreview.tsx`
+- `frontend/src/features/face-search/types/process.ts`
+- `frontend/src/features/face-search/utils/validation.ts`
+- `frontend/src/styles/app.css`
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `6191b44` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

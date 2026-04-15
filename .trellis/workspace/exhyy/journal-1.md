@@ -252,3 +252,50 @@ Reworked the app from backend path entry to browser file uploads, staged uploads
 ### Next Steps
 
 - None - task complete
+
+
+## Session 6: Refine face search frontend redesign
+
+**Date**: 2026-04-15
+**Task**: Refine face search frontend redesign
+
+### Summary
+
+(Add summary)
+
+### Main Changes
+
+| Area | Description |
+|------|-------------|
+| Visual design | Reworked the face search frontend toward a calmer Claude-inspired aesthetic with lighter cards, softer colors, and more refined typography |
+| Tool UX | Reduced hero copy, compressed the header, and moved more actionable content into the first viewport to make the page feel like a focused professional tool |
+| Workflow UI | Redesigned search input, health/run status, summary, and results presentation while preserving the existing upload, validation, and processing flow |
+
+**Updated Files**:
+- `frontend/src/features/face-search/components/FaceSearchPage.tsx`
+- `frontend/src/features/face-search/components/SearchForm.tsx`
+- `frontend/src/features/face-search/components/HealthStatus.tsx`
+- `frontend/src/features/face-search/components/ProcessStatus.tsx`
+- `frontend/src/features/face-search/components/ProcessSummary.tsx`
+- `frontend/src/features/face-search/components/CropResultList.tsx`
+- `frontend/src/styles/index.css`
+- `frontend/src/styles/app.css`
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0279b3c` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

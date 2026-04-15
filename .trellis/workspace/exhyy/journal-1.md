@@ -547,3 +547,35 @@ Added English and Chinese README files with installation, local usage, language 
 ### Next Steps
 
 - None - task complete
+
+
+## Session 13: Add rotated candidate matching
+
+**Date**: 2026-04-15
+**Task**: Add rotated candidate matching
+
+### Summary
+
+Added optional candidate auto-rotation matching, fixed rotated-match overlay coordinates, updated frontend toggle wiring, and added backend/frontend tests.
+
+### Main Changes
+
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0a791bc` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

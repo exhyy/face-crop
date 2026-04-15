@@ -463,3 +463,45 @@ Removed the separate Results panel and consolidated selection, controls, setting
 ### Next Steps
 
 - None - task complete
+
+
+## Session 11: Replace run summary with usage guide
+
+**Date**: 2026-04-15
+**Task**: Replace run summary with usage guide
+
+### Summary
+
+Replaced the dynamic Run summary panel with a static usage/help guide in the face search sidebar.
+
+### Main Changes
+
+| Area | Description |
+|------|-------------|
+| Sidebar panel | Removed the dynamic Run summary metrics and replaced them with a stable usage/help guide |
+| Face search UX | Kept the existing right-hand aside layout while making the content onboarding-focused instead of result-driven |
+| Styling | Removed summary-card styles and added lightweight help-panel styling |
+
+**Updated Files**:
+- `frontend/src/features/face-search/components/FaceSearchPage.tsx`
+- `frontend/src/features/face-search/components/ProcessSummary.tsx`
+- `frontend/src/styles/app.css`
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5c63063` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

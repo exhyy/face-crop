@@ -25,6 +25,7 @@ class ProcessResultItem(BaseModel):
     previewUrl: str | None = None
     faceBox: FaceBox | None = None
     matchScore: float | None = None
+    rotationApplied: int | None = None
 
 
 class ProcessResponse(BaseModel):
@@ -50,6 +51,7 @@ class ProcessingOptions(BaseModel):
     threshold: float = Field(default=0.75, ge=-1.0, le=1.0)
     matchMode: Literal["real"] | None = None
     selectedTargetFaceIndex: int | None = Field(default=None, ge=0)
+    autoRotateCandidates: bool = False
 
 
 class ProcessingPaths(BaseModel):

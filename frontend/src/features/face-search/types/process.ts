@@ -22,6 +22,7 @@ export interface ProcessResultItem {
   previewUrl?: string | null
   faceBox?: FaceBox | null
   matchScore?: number | null
+  rotationApplied?: number | null
 }
 
 export interface ProcessResponse {
@@ -50,6 +51,7 @@ export interface ProcessFormValues {
   threshold: string
   matchMode: '' | 'real'
   selectedTargetFaceIndex: number | null
+  autoRotateCandidates: boolean
 }
 
 export interface ProcessFormErrors {

@@ -221,7 +221,99 @@ def test_process_returns_real_best_match_crop(tmp_path: Path) -> None:
     assert saved_image.size == (14, 14)
 
 
-def test_download_crops_archive_returns_root_folder_zip(tmp_path: Path) -> None:
+def test_process_uses_rotated_candidate_match_when_enabled(tmp_path: Path) -> None:
+    process_api, config_module, original_service, original_staging_service, original_archive_service, original_settings = install_process_test_services(
+        tmp_path,
+        responses=[
+            [DetectedFace(bbox=(0, 0, 20, 20), embedding=np.array([1.0, 0.0], dtype=np.float32))],
+            [],
+            [DetectedFace(bbox=(1, 2, 11, 14), embedding=np.array([1.0, 0.0], dtype=np.float32))],
+            [],
+            [],
+        ],
+    )
+
+    try:
+        response = client.post(
+            "/process",
+            data={"padding": "0", "threshold": "0.8", "autoRotateCandidates": "true"},
+            files=[
+                ("targetImage", ("target.jpg", create_image_bytes(size=(40, 40), color=(0, 255, 0)), "image/jpeg")),
+                ("candidateImages", ("candidate.jpg", create_image_bytes(size=(30, 20), color=(0, 0, 255)), "image/jpeg")),
+            ],
+        )
+    finally:
+        restore_process_test_services(process_api, config_module, original_service, original_staging_service, original_archive_service, original_settings)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["detectedFaces"] == 1
+    assert payload["matchedFaces"] == 1
+    assert payload["results"][0]["faceBox"] == {"top": 9, "right": 28, "bottom": 19, "left": 16}
+    assert payload["results"][0]["rotationApplied"] == 90
+
+
+def test_process_does_not_use_rotated_candidate_match_when_disabled(tmp_path: Path) -> None:
+    process_api, config_module, original_service, original_staging_service, original_archive_service, original_settings = install_process_test_services(
+        tmp_path,
+        responses=[
+            [DetectedFace(bbox=(0, 0, 20, 20), embedding=np.array([1.0, 0.0], dtype=np.float32))],
+            [],
+        ],
+    )
+
+    try:
+        response = client.post(
+            "/process",
+            data={"padding": "0", "threshold": "0.8", "autoRotateCandidates": "false"},
+            files=[
+                ("targetImage", ("target.jpg", create_image_bytes(size=(40, 40), color=(0, 255, 0)), "image/jpeg")),
+                ("candidateImages", ("candidate.jpg", create_image_bytes(size=(30, 20), color=(0, 0, 255)), "image/jpeg")),
+            ],
+        )
+    finally:
+        restore_process_test_services(process_api, config_module, original_service, original_staging_service, original_archive_service, original_settings)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["detectedFaces"] == 0
+    assert payload["matchedFaces"] == 0
+    assert payload["results"] == []
+
+
+def test_process_prefers_best_match_across_rotations(tmp_path: Path) -> None:
+    process_api, config_module, original_service, original_staging_service, original_archive_service, original_settings = install_process_test_services(
+        tmp_path,
+        responses=[
+            [DetectedFace(bbox=(0, 0, 20, 20), embedding=np.array([1.0, 0.0], dtype=np.float32))],
+            [DetectedFace(bbox=(0, 0, 10, 10), embedding=np.array([0.85, 0.15], dtype=np.float32))],
+            [DetectedFace(bbox=(4, 5, 16, 17), embedding=np.array([1.0, 0.0], dtype=np.float32))],
+            [],
+            [],
+        ],
+    )
+
+    try:
+        response = client.post(
+            "/process",
+            data={"padding": "0", "threshold": "0.8", "autoRotateCandidates": "true"},
+            files=[
+                ("targetImage", ("target.jpg", create_image_bytes(size=(40, 40), color=(0, 255, 0)), "image/jpeg")),
+                ("candidateImages", ("candidate.jpg", create_image_bytes(size=(30, 20), color=(0, 0, 255)), "image/jpeg")),
+            ],
+        )
+    finally:
+        restore_process_test_services(process_api, config_module, original_service, original_staging_service, original_archive_service, original_settings)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["detectedFaces"] == 2
+    assert payload["matchedFaces"] == 1
+    assert payload["results"][0]["matchScore"] == 1.0
+    assert payload["results"][0]["faceBox"] == {"top": 4, "right": 25, "bottom": 16, "left": 13}
+    assert payload["results"][0]["rotationApplied"] == 90
+
+
     process_api, config_module, original_service, original_staging_service, original_archive_service, original_settings = install_process_test_services(
         tmp_path,
         responses=[

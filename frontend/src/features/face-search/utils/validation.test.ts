@@ -24,6 +24,7 @@ describe('validateProcessForm', () => {
       threshold: '0.9',
       matchMode: 'real' as const,
       selectedTargetFaceIndex: 1,
+      autoRotateCandidates: true,
     }
 
     expect(validateProcessForm(values)).toEqual({})
@@ -34,5 +35,6 @@ describe('validateProcessForm', () => {
     expect(formData.get('padding')).toBe('2')
     expect(formData.get('threshold')).toBe('0.9')
     expect(formData.get('matchMode')).toBe('real')
+    expect(formData.get('autoRotateCandidates')).toBe('true')
   })
 })

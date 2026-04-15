@@ -40,6 +40,15 @@ class MatchResult:
     score: float
 
 
+@dataclass(frozen=True)
+class CandidateMatchEvaluation:
+    detected_faces: int
+    best_match: MatchResult | None
+    matched_image: np.ndarray | None
+    rotation_applied: int | None
+    original_face_box: FaceBox | None
+
+
 class FaceEngine(Protocol):
     def detect_faces(self, image: np.ndarray) -> list[DetectedFace]: ...
 
@@ -128,18 +137,22 @@ class ProcessService:
 
         for candidate_index, candidate_path in enumerate(paths.candidate_images):
             candidate_image = load_image_bgr(candidate_path, code_prefix="candidate_image")
-            candidate_faces = self._face_engine.detect_faces(candidate_image)
-            detected_faces += len(candidate_faces)
+            evaluation = self._evaluate_candidate_image(
+                candidate_image=candidate_image,
+                target_face=target_face,
+                threshold=options.threshold,
+                auto_rotate_candidates=options.autoRotateCandidates,
+            )
+            detected_faces += evaluation.detected_faces
 
-            best_match = self._find_best_match(target_face, candidate_faces, options.threshold)
-            if best_match is None:
+            if evaluation.best_match is None or evaluation.matched_image is None:
                 continue
 
             saved_path = self._save_crop(
                 source_path=candidate_path,
                 output_dir=paths.output_dir,
-                image=candidate_image,
-                face=best_match.face,
+                image=evaluation.matched_image,
+                face=evaluation.best_match.face,
                 padding=options.padding,
             )
             matched_faces += 1
@@ -148,8 +161,9 @@ class ProcessService:
                     candidateIndex=candidate_index,
                     sourceFilename=candidate_path.name,
                     savedPath=str(saved_path),
-                    faceBox=best_match.face.to_face_box(),
-                    matchScore=best_match.score,
+                    faceBox=evaluation.original_face_box,
+                    matchScore=evaluation.best_match.score,
+                    rotationApplied=evaluation.rotation_applied,
                 )
             )
 
@@ -195,6 +209,99 @@ class ProcessService:
 
     def _select_largest_face_index(self, faces: list[DetectedFace]) -> int:
         return max(range(len(faces)), key=lambda index: faces[index].area)
+
+    def _evaluate_candidate_image(
+        self,
+        *,
+        candidate_image: np.ndarray,
+        target_face: DetectedFace,
+        threshold: float,
+        auto_rotate_candidates: bool,
+    ) -> CandidateMatchEvaluation:
+        detected_faces = 0
+        best_match: MatchResult | None = None
+        matched_image: np.ndarray | None = None
+        rotation_applied: int | None = None
+        original_face_box: FaceBox | None = None
+
+        for rotation in self._rotation_attempts(auto_rotate_candidates):
+            rotated_image = self._rotate_image(candidate_image, rotation)
+            candidate_faces = self._face_engine.detect_faces(rotated_image)
+            detected_faces += len(candidate_faces)
+
+            rotation_match = self._find_best_match(target_face, candidate_faces, threshold)
+            if rotation_match is None:
+                continue
+
+            if best_match is None or rotation_match.score > best_match.score:
+                best_match = rotation_match
+                matched_image = rotated_image
+                rotation_applied = rotation
+                original_face_box = self._map_face_box_to_original(
+                    rotation_match.face,
+                    rotation=rotation,
+                    original_width=candidate_image.shape[1],
+                    original_height=candidate_image.shape[0],
+                )
+
+        return CandidateMatchEvaluation(
+            detected_faces=detected_faces,
+            best_match=best_match,
+            matched_image=matched_image,
+            rotation_applied=rotation_applied,
+            original_face_box=original_face_box,
+        )
+
+    def _rotation_attempts(self, auto_rotate_candidates: bool) -> tuple[int, ...]:
+        if auto_rotate_candidates:
+            return (0, 90, 180, 270)
+        return (0,)
+
+    def _rotate_image(self, image: np.ndarray, rotation: int) -> np.ndarray:
+        if rotation == 0:
+            return image
+        if rotation == 90:
+            return np.rot90(image, 1).copy()
+        if rotation == 180:
+            return np.rot90(image, 2).copy()
+        if rotation == 270:
+            return np.rot90(image, 3).copy()
+        raise ValueError(f"Unsupported rotation angle: {rotation}")
+
+    def _map_face_box_to_original(
+        self,
+        face: DetectedFace,
+        *,
+        rotation: int,
+        original_width: int,
+        original_height: int,
+    ) -> FaceBox:
+        left, top, right, bottom = face.bbox
+
+        if rotation == 0:
+            return face.to_face_box()
+        if rotation == 90:
+            return FaceBox(
+                top=original_height - right,
+                right=original_width - top,
+                bottom=original_height - left,
+                left=original_width - bottom,
+            )
+        if rotation == 180:
+            return FaceBox(
+                top=original_height - bottom,
+                right=original_width - left,
+                bottom=original_height - top,
+                left=original_width - right,
+            )
+        if rotation == 270:
+            return FaceBox(
+                top=left,
+                right=bottom,
+                bottom=right,
+                left=top,
+            )
+        raise ValueError(f"Unsupported rotation angle: {rotation}")
 
     def _find_best_match(
         self,

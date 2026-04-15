@@ -40,6 +40,7 @@ export function createDefaultFormValues(): ProcessFormValues {
     threshold: '0.6',
     matchMode: '',
     selectedTargetFaceIndex: null,
+    autoRotateCandidates: false,
   }
 }
 
@@ -64,6 +65,8 @@ export function createProcessFormData(values: ProcessFormValues): FormData {
   if (values.selectedTargetFaceIndex !== null) {
     formData.append('selectedTargetFaceIndex', String(values.selectedTargetFaceIndex))
   }
+
+  formData.append('autoRotateCandidates', String(values.autoRotateCandidates))
 
   return formData
 }
@@ -133,7 +136,8 @@ export function isProcessResponse(value: unknown): value is ProcessResponse {
           typeof faceBox.right === 'number' &&
           typeof faceBox.bottom === 'number' &&
           typeof faceBox.left === 'number')) &&
-      (resultRecord.matchScore === null || resultRecord.matchScore === undefined || typeof resultRecord.matchScore === 'number')
+      (resultRecord.matchScore === null || resultRecord.matchScore === undefined || typeof resultRecord.matchScore === 'number') &&
+      (resultRecord.rotationApplied === null || resultRecord.rotationApplied === undefined || typeof resultRecord.rotationApplied === 'number')
     )
   })
 }

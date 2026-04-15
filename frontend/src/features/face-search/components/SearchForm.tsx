@@ -68,6 +68,10 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors, processResu
       updateField(field, event.target.value as ProcessFormValues[typeof field])
     }
 
+  const handleCheckboxChange = (field: 'autoRotateCandidates') => (event: ChangeEvent<HTMLInputElement>) => {
+    updateField(field, event.target.checked as ProcessFormValues[typeof field])
+  }
+
   const handleTargetFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const nextTargetFile = event.target.files?.[0] ?? null
 
@@ -198,6 +202,18 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors, processResu
                   </select>
                   <p className="field-hint">Comparison mode</p>
                   {externalErrors.matchMode ? <p className="error-text">{externalErrors.matchMode}</p> : null}
+                </div>
+
+                <div className="candidate-toolbar__setting">
+                  <label htmlFor="autoRotateCandidates">Auto-rotate candidate images</label>
+                  <input
+                    id="autoRotateCandidates"
+                    name="autoRotateCandidates"
+                    type="checkbox"
+                    checked={values.autoRotateCandidates}
+                    onChange={handleCheckboxChange('autoRotateCandidates')}
+                  />
+                  <p className="field-hint">Try 0°, 90°, 180°, and 270° rotations during candidate face detection.</p>
                 </div>
               </div>
             </div>

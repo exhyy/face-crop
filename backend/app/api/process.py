@@ -46,12 +46,14 @@ def process_images(
     threshold: Annotated[float, Form()] = 0.75,
     matchMode: Annotated[Literal["real"] | None, Form()] = None,
     selectedTargetFaceIndex: Annotated[int | None, Form()] = None,
+    autoRotateCandidates: Annotated[bool, Form()] = False,
 ) -> ProcessResponse:
     options = ProcessingOptions(
         padding=padding,
         threshold=threshold,
         matchMode=matchMode,
         selectedTargetFaceIndex=selectedTargetFaceIndex,
+        autoRotateCandidates=autoRotateCandidates,
     )
     logger.info("received process request", extra={"total_images": len(candidateImages)})
     paths = staging_service.stage_uploads(target_image=targetImage, candidate_images=candidateImages)

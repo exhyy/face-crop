@@ -299,3 +299,35 @@ Reworked the app from backend path entry to browser file uploads, staged uploads
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: Add interactive target face selection
+
+**Date**: 2026-04-15
+**Task**: Add interactive target face selection
+
+### Summary
+
+Added target image preview with backend face detection, selectable target face boxes, and refined notice/highlight UI for the face search flow.
+
+### Main Changes
+
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `e24ce64` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 6
+- **Total Sessions**: 7
 - **Last Active**: 2026-04-15
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~301 | Active |
+| `journal-1.md` | ~333 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits |
 |---|------|-------|---------|
+| 7 | 2026-04-15 | Add interactive target face selection | `e24ce64` |
 | 6 | 2026-04-15 | Refine face search frontend redesign | `0279b3c` |
 | 5 | 2026-04-15 | Switch face processing to browser uploads | `a2cf426` |
 | 4 | 2026-04-15 | Implement initial frontend app | `dd382d2` |

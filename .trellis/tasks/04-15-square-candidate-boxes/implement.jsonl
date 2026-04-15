@@ -1,0 +1,7 @@
+{"file": ".trellis/workflow.md", "reason": "Project workflow and conventions"}
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend development guide"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend development guide"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "Backend ownership for process, matching, cropping, and output writing"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Backend service quality and route/service boundaries"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Frontend and API contract type alignment for FaceBox"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Frontend overlay consumes face box coordinates declaratively"}

@@ -419,3 +419,47 @@ Replaced hardcoded local allow_origins entries in backend/app/main.py with a loc
 ### Next Steps
 
 - None - task complete
+
+
+## Session 10: Streamline face search preview workflow
+
+**Date**: 2026-04-15
+**Task**: Streamline face search preview workflow
+
+### Summary
+
+Removed the separate Results panel and consolidated selection, controls, settings, and match review into the candidate preview workflow.
+
+### Main Changes
+
+| Area | Description |
+|------|-------------|
+| Face search UI | Removed the dedicated Results panel and deleted `CropResultList.tsx` |
+| Candidate workflow | Consolidated image selection, run controls, download, and settings into the Candidate images toolbar |
+| Preview UX | Moved candidate thumbnails above the main preview and restored the no-results threshold hint |
+| Input consistency | Matched the Target image file picker to the Candidate images button style |
+
+**Updated Files**:
+- `frontend/src/features/face-search/components/FaceSearchPage.tsx`
+- `frontend/src/features/face-search/components/SearchForm.tsx`
+- `frontend/src/features/face-search/components/CropResultList.tsx`
+- `frontend/src/styles/app.css`
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `684659d` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

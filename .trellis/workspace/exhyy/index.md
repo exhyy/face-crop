@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 9
+- **Total Sessions**: 10
 - **Last Active**: 2026-04-15
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~421 | Active |
+| `journal-1.md` | ~465 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits |
 |---|------|-------|---------|
+| 10 | 2026-04-15 | Streamline face search preview workflow | `684659d` |
 | 9 | 2026-04-15 | Simplify backend CORS config | `3c17541` |
 | 8 | 2026-04-15 | Enhance candidate preview workflow | `6191b44` |
 | 7 | 2026-04-15 | Add interactive target face selection | `e24ce64` |

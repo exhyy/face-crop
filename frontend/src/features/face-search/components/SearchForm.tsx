@@ -29,6 +29,7 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors, processResu
   const [targetFaceError, setTargetFaceError] = useState<string | null>(null)
   const [selectedCandidateIndex, setSelectedCandidateIndex] = useState(0)
   const [candidatePreviewUrls, setCandidatePreviewUrls] = useState<string[]>([])
+  const hasNoResultsAfterRun = runId !== null && processResults.length === 0
 
   useEffect(() => {
     return () => {
@@ -128,8 +129,10 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors, processResu
               <p className="help-text">Reference image for the current run.</p>
             </div>
           </div>
-          <div className="upload-card upload-card--target">
-            <label htmlFor="targetFile">Choose target image</label>
+          <div className="upload-card upload-card--target upload-card--file-button">
+            <label className="button button--secondary button--file" htmlFor="targetFile">
+              Choose target image
+            </label>
             <input id="targetFile" name="targetFile" type="file" accept="image/*" onChange={handleTargetFileChange} />
             <p className="field-hint">Single image file.</p>
             <div className="selection-summary">
@@ -154,36 +157,62 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors, processResu
           <div className="form-section__header">
             <div>
               <h3>Candidate images</h3>
-              <p className="help-text">Batch of images to compare.</p>
+              <p className="help-text">Choose the batch, start the run, then inspect each candidate from the preview workspace.</p>
             </div>
           </div>
-          <div className="upload-card upload-card--candidate">
-            <label htmlFor="candidateFiles">Choose candidate images</label>
+          <div className="upload-card upload-card--candidate upload-card--candidate-workspace">
+            <div className="candidate-toolbar">
+              <div className="candidate-toolbar__actions">
+                <label className="button button--secondary button--file" htmlFor="candidateFiles">
+                  Choose images
+                </label>
+                <button className="button button--primary" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Processing...' : 'Run search'}
+                </button>
+                {runId && processResults.length > 0 ? (
+                  <a className="button button--secondary" href={getFaceCropsDownloadUrl(runId)}>
+                    Download crops zip
+                  </a>
+                ) : null}
+              </div>
+              <div className="candidate-toolbar__settings">
+                <div className="candidate-toolbar__setting">
+                  <label htmlFor="padding">Padding</label>
+                  <input id="padding" name="padding" value={values.padding} onChange={handleInputChange('padding')} inputMode="numeric" />
+                  <p className="field-hint">Crop margin</p>
+                  {externalErrors.padding ? <p className="error-text">{externalErrors.padding}</p> : null}
+                </div>
+
+                <div className="candidate-toolbar__setting">
+                  <label htmlFor="threshold">Threshold</label>
+                  <input id="threshold" name="threshold" value={values.threshold} onChange={handleInputChange('threshold')} inputMode="decimal" />
+                  <p className="field-hint">Match strictness</p>
+                  {externalErrors.threshold ? <p className="error-text">{externalErrors.threshold}</p> : null}
+                </div>
+
+                <div className="candidate-toolbar__setting">
+                  <label htmlFor="matchMode">Mode</label>
+                  <select id="matchMode" name="matchMode" value={values.matchMode} onChange={handleInputChange('matchMode')}>
+                    <option value="">Default</option>
+                    <option value="real">real</option>
+                  </select>
+                  <p className="field-hint">Comparison mode</p>
+                  {externalErrors.matchMode ? <p className="error-text">{externalErrors.matchMode}</p> : null}
+                </div>
+              </div>
+            </div>
+
             <input id="candidateFiles" name="candidateFiles" type="file" accept="image/*" multiple onChange={handleCandidateFilesChange} />
             <p className="field-hint">Multiple files supported.</p>
             <div className="selection-summary">
               <span className="selection-summary__label">Selected</span>
               <span className="selection-summary__value">{values.candidateFiles.length} file{values.candidateFiles.length === 1 ? '' : 's'}</span>
             </div>
+            {hasNoResultsAfterRun ? (
+              <p className="candidate-preview__notice">No matches found. Try lowering Threshold to make matching less strict, then run the search again.</p>
+            ) : null}
             {activeCandidatePreviewUrl && activeCandidateFile ? (
               <div className="candidate-preview">
-                <div className="candidate-preview__stage">
-                  <FaceOverlayPreview
-                    previewUrl={activeCandidatePreviewUrl}
-                    imageAlt={`Candidate preview for ${activeCandidateFile.name}`}
-                    faces={activeCandidateMatches}
-                    selectedFaceIndex={activeCandidateMatches.length > 0 ? 0 : null}
-                    frameClassName="target-preview__frame candidate-preview__frame"
-                  />
-                </div>
-                <div className="candidate-preview__meta">
-                  <p className="candidate-preview__filename">{activeCandidateFile.name}</p>
-                  <p className="help-text">
-                    {activeCandidateMatches.length > 0
-                      ? `${activeCandidateMatches.length} matched face${activeCandidateMatches.length === 1 ? '' : 's'} highlighted on this image.`
-                      : 'Run search to highlight matched faces on the active candidate image.'}
-                  </p>
-                </div>
                 <div className="candidate-preview__thumbs" role="list" aria-label="Candidate image thumbnails">
                   {values.candidateFiles.map((file, index) => {
                     const thumbnailUrl = candidatePreviewUrls[index]
@@ -203,77 +232,29 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors, processResu
                     )
                   })}
                 </div>
+                <div className="candidate-preview__meta">
+                  <p className="candidate-preview__filename">{activeCandidateFile.name}</p>
+                  <p className="help-text">
+                    {activeCandidateMatches.length > 0
+                      ? `${activeCandidateMatches.length} matched face${activeCandidateMatches.length === 1 ? '' : 's'} highlighted on this image.`
+                      : 'Run search to review matches on the active candidate image.'}
+                  </p>
+                </div>
+                <div className="candidate-preview__stage">
+                  <FaceOverlayPreview
+                    previewUrl={activeCandidatePreviewUrl}
+                    imageAlt={`Candidate preview for ${activeCandidateFile.name}`}
+                    faces={activeCandidateMatches}
+                    selectedFaceIndex={activeCandidateMatches.length > 0 ? 0 : null}
+                    frameClassName="target-preview__frame candidate-preview__frame"
+                  />
+                </div>
               </div>
             ) : null}
             {externalErrors.candidateFiles ? <p className="error-text">{externalErrors.candidateFiles}</p> : null}
           </div>
         </div>
 
-        <div className="form-section">
-          <div className="form-section__header">
-            <div>
-              <h3>Settings</h3>
-              <p className="help-text">Fine-tune how strict matching should be and how the saved crops are framed.</p>
-            </div>
-          </div>
-          <div className="form-row form-row--inline form-row--settings">
-            <div className="form-row setting-card setting-card--polished">
-              <div className="setting-card__intro">
-                <p className="setting-card__eyebrow">Crop framing</p>
-                <label htmlFor="padding">Padding</label>
-                <p className="setting-card__description">Adds extra space around the matched face before the crop is saved.</p>
-              </div>
-              <input id="padding" name="padding" value={values.padding} onChange={handleInputChange('padding')} inputMode="numeric" />
-              <p className="setting-card__note">Use 0 for a tight crop, or raise it when you want more headroom around the face.</p>
-              {externalErrors.padding ? <p className="error-text">{externalErrors.padding}</p> : null}
-            </div>
-
-            <div className="form-row setting-card setting-card--polished">
-              <div className="setting-card__intro">
-                <p className="setting-card__eyebrow">Match strictness</p>
-                <label htmlFor="threshold">Threshold</label>
-                <p className="setting-card__description">Controls how closely a candidate face must match the target face.</p>
-              </div>
-              <input
-                id="threshold"
-                name="threshold"
-                value={values.threshold}
-                onChange={handleInputChange('threshold')}
-                inputMode="decimal"
-              />
-              <p className="setting-card__note">Higher values are stricter. Lower values allow more possible matches.</p>
-              {externalErrors.threshold ? <p className="error-text">{externalErrors.threshold}</p> : null}
-            </div>
-
-            <div className="form-row setting-card setting-card--polished">
-              <div className="setting-card__intro">
-                <p className="setting-card__eyebrow">Comparison mode</p>
-                <label htmlFor="matchMode">Match mode</label>
-                <p className="setting-card__description">Choose how the backend should run the face comparison for this search.</p>
-              </div>
-              <select id="matchMode" name="matchMode" value={values.matchMode} onChange={handleInputChange('matchMode')}>
-                <option value="">Default</option>
-                <option value="real">real</option>
-              </select>
-              <p className="setting-card__note">Default is the standard option. Use real only when you specifically want that backend mode.</p>
-              {externalErrors.matchMode ? <p className="error-text">{externalErrors.matchMode}</p> : null}
-            </div>
-          </div>
-        </div>
-
-        <div className="actions actions--form actions--quiet">
-          <div className="actions actions--form-inline">
-            <button className="button button--primary" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Processing...' : 'Run search'}
-            </button>
-            {runId && processResults.length > 0 ? (
-              <a className="button button--secondary" href={getFaceCropsDownloadUrl(runId)}>
-                Download crops zip
-              </a>
-            ) : null}
-          </div>
-          <p className="help-text">A new run replaces the previous result set.</p>
-        </div>
       </form>
     </section>
   )

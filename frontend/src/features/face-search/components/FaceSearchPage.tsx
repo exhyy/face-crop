@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-import { CropResultList } from './CropResultList'
 import { HealthStatus } from './HealthStatus'
 import { ProcessStatus } from './ProcessStatus'
 import { ProcessSummary } from './ProcessSummary'
@@ -55,10 +54,6 @@ export function FaceSearchPage() {
         <aside className="layout-grid__secondary">
           <ProcessSummary status={processFaces.status} result={processFaces.result} />
         </aside>
-      </div>
-
-      <div className="results-section">
-        <CropResultList results={processFaces.result?.results ?? []} status={processFaces.status} />
       </div>
     </main>
   )

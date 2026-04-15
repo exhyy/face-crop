@@ -387,3 +387,35 @@ Added target image preview with backend face detection, selectable target face b
 ### Next Steps
 
 - None - task complete
+
+
+## Session 9: Simplify backend CORS config
+
+**Date**: 2026-04-15
+**Task**: Simplify backend CORS config
+
+### Summary
+
+Replaced hardcoded local allow_origins entries in backend/app/main.py with a localhost/127.0.0.1 regex-based CORS rule for local development.
+
+### Main Changes
+
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `3c17541` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

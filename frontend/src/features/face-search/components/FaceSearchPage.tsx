@@ -27,23 +27,35 @@ export function FaceSearchPage() {
   }
 
   return (
-    <main className="page">
-      <header className="page__header">
-        <h1 className="page__title">Face Crop Frontend</h1>
-        <p className="page__description">
-          Upload local images to the backend, then review processing status, summary metrics, and saved outputs.
-        </p>
+    <main className="page page-shell">
+      <header className="page__header page-hero page-hero--compact">
+        <div className="page-hero__bar">
+          <div className="page-hero__identity">
+            <div className="page__eyebrow">Local face search</div>
+            <h1 className="page__title page__title--compact">Face search</h1>
+          </div>
+          <p className="page-hero__note">Reference image + batch comparison</p>
+        </div>
+        <div className="page__status-row page__status-row--compact">
+          <HealthStatus status={health.status} data={health.data} error={health.error} />
+          <ProcessStatus status={processFaces.status} error={processFaces.error} />
+        </div>
       </header>
 
-      <div className="layout-grid">
-        <HealthStatus status={health.status} data={health.data} error={health.error} />
-        <SearchForm
-          isSubmitting={processFaces.status === 'submitting'}
-          onSubmit={handleSubmit}
-          externalErrors={formErrors}
-        />
-        <ProcessStatus status={processFaces.status} error={processFaces.error} />
-        <ProcessSummary status={processFaces.status} result={processFaces.result} />
+      <div className="layout-grid layout-grid--main layout-grid--above-fold">
+        <div className="layout-grid__primary">
+          <SearchForm
+            isSubmitting={processFaces.status === 'submitting'}
+            onSubmit={handleSubmit}
+            externalErrors={formErrors}
+          />
+        </div>
+        <aside className="layout-grid__secondary">
+          <ProcessSummary status={processFaces.status} result={processFaces.result} />
+        </aside>
+      </div>
+
+      <div className="results-section">
         <CropResultList results={processFaces.result?.results ?? []} />
       </div>
     </main>

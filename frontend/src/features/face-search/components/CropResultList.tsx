@@ -6,41 +6,61 @@ interface CropResultListProps {
 
 export function CropResultList({ results }: CropResultListProps) {
   return (
-    <section className="panel">
-      <h2>Results</h2>
+    <section className="panel panel--results">
+      <div className="panel__intro panel__intro--results">
+        <div>
+          <p className="section-label">Results</p>
+          <h2>Saved crops</h2>
+        </div>
+        <p className="help-text">{results.length === 0 ? 'No result items to display yet.' : `${results.length} item${results.length === 1 ? '' : 's'} returned`}</p>
+      </div>
       {results.length === 0 ? (
-        <p className="help-text">No result items to display yet.</p>
+        <div className="results-empty-state">
+          <p className="results-empty-state__title">Nothing to review yet</p>
+          <p className="help-text">Run the search to inspect saved paths, match scores, and preview crops here.</p>
+        </div>
       ) : (
         <ol className="result-list">
           {results.map((result) => (
-            <li key={`${result.sourceFilename}-${result.savedPath}`} className="result-item">
-              <dl className="result-item__meta">
-                <div>
-                  <dt>Source filename</dt>
-                  <dd>{result.sourceFilename}</dd>
-                </div>
-                <div>
-                  <dt>Saved path</dt>
-                  <dd>{result.savedPath}</dd>
-                </div>
-                {result.matchScore !== null && result.matchScore !== undefined ? (
-                  <div>
-                    <dt>Match score</dt>
-                    <dd>{result.matchScore.toFixed(4)}</dd>
-                  </div>
-                ) : null}
-                {result.faceBox ? (
-                  <div>
-                    <dt>Face box</dt>
-                    <dd>
-                      top {result.faceBox.top}, right {result.faceBox.right}, bottom {result.faceBox.bottom}, left {result.faceBox.left}
-                    </dd>
-                  </div>
-                ) : null}
-              </dl>
+            <li key={`${result.sourceFilename}-${result.savedPath}`} className="result-card">
               {result.previewUrl ? (
-                <img src={result.previewUrl} alt={`Preview for ${result.sourceFilename}`} />
-              ) : null}
+                <div className="result-card__media">
+                  <img className="result-card__image" src={result.previewUrl} alt={`Preview for ${result.sourceFilename}`} />
+                </div>
+              ) : (
+                <div className="result-card__media result-card__media--empty">
+                  <span>No preview</span>
+                </div>
+              )}
+              <div className="result-card__content">
+                <div className="result-card__header">
+                  <div>
+                    <p className="section-label">Source file</p>
+                    <h3 className="result-card__title">{result.sourceFilename}</h3>
+                  </div>
+                  {result.matchScore !== null && result.matchScore !== undefined ? (
+                    <div className="result-chip">
+                      <span className="result-chip__label">Score</span>
+                      <strong>{result.matchScore.toFixed(4)}</strong>
+                    </div>
+                  ) : null}
+                </div>
+
+                <dl className="result-meta-grid">
+                  <div className="result-meta-grid__item result-meta-grid__item--full">
+                    <dt>Saved path</dt>
+                    <dd className="code-text">{result.savedPath}</dd>
+                  </div>
+                  {result.faceBox ? (
+                    <div className="result-meta-grid__item result-meta-grid__item--full">
+                      <dt>Face box</dt>
+                      <dd>
+                        top {result.faceBox.top}, right {result.faceBox.right}, bottom {result.faceBox.bottom}, left {result.faceBox.left}
+                      </dd>
+                    </div>
+                  ) : null}
+                </dl>
+              </div>
             </li>
           ))}
         </ol>

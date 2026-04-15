@@ -8,11 +8,11 @@ interface ProcessStatusProps {
 export function ProcessStatus({ status, error }: ProcessStatusProps) {
   const message =
     status === 'idle'
-      ? 'Ready to submit a processing request.'
+      ? 'Ready to run.'
       : status === 'submitting'
         ? 'Processing images...'
         : status === 'success'
-          ? 'Processing completed successfully.'
+          ? 'Run completed.'
           : error ?? 'Processing failed.'
 
   const badgeClassName =
@@ -22,13 +22,19 @@ export function ProcessStatus({ status, error }: ProcessStatusProps) {
         ? 'badge badge--warn'
         : status === 'error'
           ? 'badge badge--error'
-          : 'badge badge--warn'
+          : 'badge badge--neutral'
+
+  const badgeLabel =
+    status === 'idle' ? 'Ready' : status === 'submitting' ? 'Running' : status === 'success' ? 'Complete' : 'Error'
 
   return (
-    <section className="panel status-block" aria-live="polite">
-      <div>
-        <h2>Processing status</h2>
-        <span className={badgeClassName}>{status}</span>
+    <section className="status-card" aria-live="polite">
+      <div className="status-card__header">
+        <div>
+          <p className="status-card__title">Run</p>
+          <p className="status-card__meta">Current processing state.</p>
+        </div>
+        <span className={badgeClassName}>{badgeLabel}</span>
       </div>
       <p className={status === 'error' ? 'error-text' : 'help-text'}>{message}</p>
     </section>

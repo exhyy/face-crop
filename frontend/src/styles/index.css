@@ -1,13 +1,56 @@
 :root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Söhne', 'Instrument Sans', 'Avenir Next', 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #0f172a;
-  background-color: #f8fafc;
+  color: #1c1816;
+  background-color: #f7f4ee;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --color-bg: #f7f4ee;
+  --color-bg-accent: #efeadf;
+  --color-surface: rgba(255, 252, 248, 0.84);
+  --color-surface-strong: rgba(255, 253, 250, 0.96);
+  --color-surface-muted: rgba(244, 238, 229, 0.82);
+  --color-border: rgba(88, 74, 62, 0.09);
+  --color-border-strong: rgba(88, 74, 62, 0.16);
+  --color-text: #1c1816;
+  --color-text-muted: #5a514a;
+  --color-text-soft: #857a71;
+  --color-accent: #44403c;
+  --color-accent-hover: #35312d;
+  --color-success-bg: #edf3ee;
+  --color-success-text: #3b5c46;
+  --color-warning-bg: #f5eddf;
+  --color-warning-text: #7a6338;
+  --color-error-bg: #f7e8e4;
+  --color-error-text: #8a4c43;
+  --color-neutral-bg: #f0ebe3;
+  --color-neutral-text: #655d56;
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  --shadow-sm: 0 10px 30px rgba(35, 27, 22, 0.04);
+  --shadow-md: 0 28px 72px rgba(35, 27, 22, 0.06);
+
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+
+  --page-width: 1200px;
+  --content-width: 780px;
+  --focus-ring: 0 0 0 4px rgba(68, 64, 60, 0.1);
 }
 
 * {
@@ -23,6 +66,10 @@ body,
 
 body {
   min-width: 320px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.88), transparent 28%),
+    linear-gradient(180deg, #f8f5ef 0%, #f4efe7 100%);
+  color: var(--color-text);
 }
 
 button,
@@ -32,6 +79,33 @@ textarea {
   font: inherit;
 }
 
+button,
+input,
+select,
+textarea,
+a {
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 a {
   color: inherit;
+}
+
+::selection {
+  background: rgba(68, 64, 60, 0.12);
 }

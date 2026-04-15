@@ -13,9 +13,12 @@ export function HealthStatus({ status, data, error }: HealthStatusProps) {
   const badgeLabel = status === 'healthy' ? 'Healthy' : status === 'loading' ? 'Checking' : 'Unavailable'
 
   return (
-    <section className="panel status-block" aria-live="polite">
-      <div>
-        <h2>Backend status</h2>
+    <section className="status-card" aria-live="polite">
+      <div className="status-card__header">
+        <div>
+          <p className="status-card__title">Backend</p>
+          <p className="status-card__meta">Local processing service.</p>
+        </div>
         <span className={badgeClassName}>{badgeLabel}</span>
       </div>
       {data ? <p className="help-text">Connected to {data.service}</p> : null}

@@ -37,7 +37,7 @@ export function createDefaultFormValues(): ProcessFormValues {
     targetFile: null,
     candidateFiles: [],
     padding: '0',
-    threshold: '0.75',
+    threshold: '0.6',
     matchMode: '',
     selectedTargetFaceIndex: null,
   }
@@ -123,6 +123,7 @@ export function isProcessResponse(value: unknown): value is ProcessResponse {
     const faceBox = resultRecord.faceBox as Record<string, unknown> | null | undefined
 
     return (
+      typeof resultRecord.candidateIndex === 'number' &&
       typeof resultRecord.sourceFilename === 'string' &&
       typeof resultRecord.savedPath === 'string' &&
       (resultRecord.previewUrl === null || typeof resultRecord.previewUrl === 'string' || resultRecord.previewUrl === undefined) &&

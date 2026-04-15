@@ -126,7 +126,7 @@ class ProcessService:
         detected_faces = 0
         matched_faces = 0
 
-        for candidate_path in paths.candidate_images:
+        for candidate_index, candidate_path in enumerate(paths.candidate_images):
             candidate_image = load_image_bgr(candidate_path, code_prefix="candidate_image")
             candidate_faces = self._face_engine.detect_faces(candidate_image)
             detected_faces += len(candidate_faces)
@@ -145,6 +145,7 @@ class ProcessService:
             matched_faces += 1
             results.append(
                 ProcessResultItem(
+                    candidateIndex=candidate_index,
                     sourceFilename=candidate_path.name,
                     savedPath=str(saved_path),
                     faceBox=best_match.face.to_face_box(),

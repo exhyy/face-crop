@@ -16,6 +16,7 @@ export interface TargetFaceDetectionResponse {
 }
 
 export interface ProcessResultItem {
+  candidateIndex: number
   sourceFilename: string
   savedPath: string
   previewUrl?: string | null

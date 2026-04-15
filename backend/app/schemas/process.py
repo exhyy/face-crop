@@ -19,6 +19,7 @@ class TargetFaceDetectionResponse(BaseModel):
 
 
 class ProcessResultItem(BaseModel):
+    candidateIndex: int
     sourceFilename: str
     savedPath: str
     previewUrl: str | None = None

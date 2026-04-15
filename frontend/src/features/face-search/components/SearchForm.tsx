@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 
-import { detectTargetFaces } from '../api/process'
+import { detectTargetFaces, getFaceCropsDownloadUrl } from '../api/process'
+import { FaceOverlayPreview } from './FaceOverlayPreview'
 import { TargetImagePreview } from './TargetImagePreview'
 import type {
   FaceBox,
   ProcessFormErrors,
   ProcessFormValues,
+  ProcessResultItem,
   TargetFaceDetectionStatus,
 } from '../types/process'
 import { createDefaultFormValues } from '../utils/validation'
@@ -15,14 +17,18 @@ interface SearchFormProps {
   isSubmitting: boolean
   onSubmit: (values: ProcessFormValues) => void
   externalErrors: ProcessFormErrors
+  processResults: ProcessResultItem[]
+  runId: string | null
 }
 
-export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFormProps) {
+export function SearchForm({ isSubmitting, onSubmit, externalErrors, processResults, runId }: SearchFormProps) {
   const [values, setValues] = useState<ProcessFormValues>(createDefaultFormValues)
   const [targetPreviewUrl, setTargetPreviewUrl] = useState<string | null>(null)
   const [detectedFaces, setDetectedFaces] = useState<FaceBox[]>([])
   const [targetFaceStatus, setTargetFaceStatus] = useState<TargetFaceDetectionStatus>('idle')
   const [targetFaceError, setTargetFaceError] = useState<string | null>(null)
+  const [selectedCandidateIndex, setSelectedCandidateIndex] = useState(0)
+  const [candidatePreviewUrls, setCandidatePreviewUrls] = useState<string[]>([])
 
   useEffect(() => {
     return () => {
@@ -31,6 +37,26 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFor
       }
     }
   }, [targetPreviewUrl])
+
+  useEffect(() => {
+    const nextPreviewUrls = values.candidateFiles.map((file) => URL.createObjectURL(file))
+    setCandidatePreviewUrls((current) => {
+      current.forEach((url) => URL.revokeObjectURL(url))
+      return nextPreviewUrls
+    })
+    setSelectedCandidateIndex(0)
+
+    return () => {
+      nextPreviewUrls.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, [values.candidateFiles])
+
+  const activeCandidateFile = values.candidateFiles[selectedCandidateIndex] ?? null
+  const activeCandidatePreviewUrl = candidatePreviewUrls[selectedCandidateIndex] ?? null
+  const activeCandidateMatches = useMemo(
+    () => processResults.filter((result) => result.candidateIndex === selectedCandidateIndex && result.faceBox).map((result) => result.faceBox as FaceBox),
+    [processResults, selectedCandidateIndex],
+  )
 
   const updateField = <T extends keyof ProcessFormValues>(field: T, value: ProcessFormValues[T]) => {
     setValues((current) => ({ ...current, [field]: value }))
@@ -139,12 +165,45 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFor
               <span className="selection-summary__label">Selected</span>
               <span className="selection-summary__value">{values.candidateFiles.length} file{values.candidateFiles.length === 1 ? '' : 's'}</span>
             </div>
-            {values.candidateFiles.length > 0 ? (
-              <ul className="selected-file-list">
-                {values.candidateFiles.map((file) => (
-                  <li key={`${file.name}-${file.lastModified}`}>{file.name}</li>
-                ))}
-              </ul>
+            {activeCandidatePreviewUrl && activeCandidateFile ? (
+              <div className="candidate-preview">
+                <div className="candidate-preview__stage">
+                  <FaceOverlayPreview
+                    previewUrl={activeCandidatePreviewUrl}
+                    imageAlt={`Candidate preview for ${activeCandidateFile.name}`}
+                    faces={activeCandidateMatches}
+                    selectedFaceIndex={activeCandidateMatches.length > 0 ? 0 : null}
+                    frameClassName="target-preview__frame candidate-preview__frame"
+                  />
+                </div>
+                <div className="candidate-preview__meta">
+                  <p className="candidate-preview__filename">{activeCandidateFile.name}</p>
+                  <p className="help-text">
+                    {activeCandidateMatches.length > 0
+                      ? `${activeCandidateMatches.length} matched face${activeCandidateMatches.length === 1 ? '' : 's'} highlighted on this image.`
+                      : 'Run search to highlight matched faces on the active candidate image.'}
+                  </p>
+                </div>
+                <div className="candidate-preview__thumbs" role="list" aria-label="Candidate image thumbnails">
+                  {values.candidateFiles.map((file, index) => {
+                    const thumbnailUrl = candidatePreviewUrls[index]
+                    const isActive = index === selectedCandidateIndex
+
+                    return (
+                      <button
+                        key={`${file.name}-${file.lastModified}-${index}`}
+                        className={`candidate-preview__thumb ${isActive ? 'candidate-preview__thumb--active' : ''}`}
+                        type="button"
+                        onClick={() => setSelectedCandidateIndex(index)}
+                        aria-pressed={isActive}
+                        aria-label={`Show candidate image ${index + 1}: ${file.name}`}
+                      >
+                        <img src={thumbnailUrl} alt="" />
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             ) : null}
             {externalErrors.candidateFiles ? <p className="error-text">{externalErrors.candidateFiles}</p> : null}
           </div>
@@ -154,19 +213,27 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFor
           <div className="form-section__header">
             <div>
               <h3>Settings</h3>
-              <p className="help-text">Threshold, padding, and matching mode.</p>
+              <p className="help-text">Fine-tune how strict matching should be and how the saved crops are framed.</p>
             </div>
           </div>
           <div className="form-row form-row--inline form-row--settings">
-            <div className="form-row setting-card">
-              <label htmlFor="padding">Padding</label>
+            <div className="form-row setting-card setting-card--polished">
+              <div className="setting-card__intro">
+                <p className="setting-card__eyebrow">Crop framing</p>
+                <label htmlFor="padding">Padding</label>
+                <p className="setting-card__description">Adds extra space around the matched face before the crop is saved.</p>
+              </div>
               <input id="padding" name="padding" value={values.padding} onChange={handleInputChange('padding')} inputMode="numeric" />
-              <p className="field-hint">Non-negative integer.</p>
+              <p className="setting-card__note">Use 0 for a tight crop, or raise it when you want more headroom around the face.</p>
               {externalErrors.padding ? <p className="error-text">{externalErrors.padding}</p> : null}
             </div>
 
-            <div className="form-row setting-card">
-              <label htmlFor="threshold">Threshold</label>
+            <div className="form-row setting-card setting-card--polished">
+              <div className="setting-card__intro">
+                <p className="setting-card__eyebrow">Match strictness</p>
+                <label htmlFor="threshold">Threshold</label>
+                <p className="setting-card__description">Controls how closely a candidate face must match the target face.</p>
+              </div>
               <input
                 id="threshold"
                 name="threshold"
@@ -174,26 +241,37 @@ export function SearchForm({ isSubmitting, onSubmit, externalErrors }: SearchFor
                 onChange={handleInputChange('threshold')}
                 inputMode="decimal"
               />
-              <p className="field-hint">Range: -1 to 1.</p>
+              <p className="setting-card__note">Higher values are stricter. Lower values allow more possible matches.</p>
               {externalErrors.threshold ? <p className="error-text">{externalErrors.threshold}</p> : null}
             </div>
 
-            <div className="form-row setting-card">
-              <label htmlFor="matchMode">Match mode</label>
+            <div className="form-row setting-card setting-card--polished">
+              <div className="setting-card__intro">
+                <p className="setting-card__eyebrow">Comparison mode</p>
+                <label htmlFor="matchMode">Match mode</label>
+                <p className="setting-card__description">Choose how the backend should run the face comparison for this search.</p>
+              </div>
               <select id="matchMode" name="matchMode" value={values.matchMode} onChange={handleInputChange('matchMode')}>
                 <option value="">Default</option>
                 <option value="real">real</option>
               </select>
-              <p className="field-hint">Backend-supported mode.</p>
+              <p className="setting-card__note">Default is the standard option. Use real only when you specifically want that backend mode.</p>
               {externalErrors.matchMode ? <p className="error-text">{externalErrors.matchMode}</p> : null}
             </div>
           </div>
         </div>
 
         <div className="actions actions--form actions--quiet">
-          <button className="button button--primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Processing...' : 'Run search'}
-          </button>
+          <div className="actions actions--form-inline">
+            <button className="button button--primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Processing...' : 'Run search'}
+            </button>
+            {runId && processResults.length > 0 ? (
+              <a className="button button--secondary" href={getFaceCropsDownloadUrl(runId)}>
+                Download crops zip
+              </a>
+            ) : null}
+          </div>
           <p className="help-text">A new run replaces the previous result set.</p>
         </div>
       </form>

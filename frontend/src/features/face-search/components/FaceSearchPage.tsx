@@ -48,6 +48,8 @@ export function FaceSearchPage() {
             isSubmitting={processFaces.status === 'submitting'}
             onSubmit={handleSubmit}
             externalErrors={formErrors}
+            processResults={processFaces.result?.results ?? []}
+            runId={processFaces.result?.runId ?? null}
           />
         </div>
         <aside className="layout-grid__secondary">
@@ -56,7 +58,7 @@ export function FaceSearchPage() {
       </div>
 
       <div className="results-section">
-        <CropResultList results={processFaces.result?.results ?? []} />
+        <CropResultList results={processFaces.result?.results ?? []} status={processFaces.status} />
       </div>
     </main>
   )

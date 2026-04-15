@@ -2,8 +2,11 @@ import logging
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, File, Form, UploadFile
+from fastapi.responses import FileResponse
 
+from app.core.config import get_settings
 from app.schemas.process import ErrorResponse, ProcessResponse, ProcessingOptions, TargetFaceDetectionResponse
+from app.services.crop_archive import CropArchiveService
 from app.services.face_matching import ProcessService
 from app.services.upload_staging import UploadStagingService
 
@@ -11,6 +14,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["process"])
 service = ProcessService()
 staging_service = UploadStagingService()
+archive_service = CropArchiveService(output_base_dir=get_settings().service_output_base_dir)
 
 
 @router.post(
@@ -56,3 +60,16 @@ def process_images(
         return service.process_paths(paths, options)
     finally:
         staging_service.cleanup_inputs(paths)
+
+
+@router.get(
+    "/process/{run_id}/download",
+    responses={400: {"model": ErrorResponse}, 422: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
+)
+def download_crops_archive(run_id: str) -> FileResponse:
+    archive_path = archive_service.create_run_archive(run_id)
+    return FileResponse(
+        archive_path,
+        media_type="application/zip",
+        filename=f"face-search-results-{run_id}.zip",
+    )

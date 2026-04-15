@@ -1,10 +1,13 @@
-import type { ProcessResultItem } from '../types/process'
+import type { ProcessResultItem, ProcessStatus } from '../types/process'
 
 interface CropResultListProps {
   results: ProcessResultItem[]
+  status: ProcessStatus
 }
 
-export function CropResultList({ results }: CropResultListProps) {
+export function CropResultList({ results, status }: CropResultListProps) {
+  const hasNoResultsAfterRun = status === 'success' && results.length === 0
+
   return (
     <section className="panel panel--results">
       <div className="panel__intro panel__intro--results">
@@ -12,12 +15,18 @@ export function CropResultList({ results }: CropResultListProps) {
           <p className="section-label">Results</p>
           <h2>Saved crops</h2>
         </div>
-        <p className="help-text">{results.length === 0 ? 'No result items to display yet.' : `${results.length} item${results.length === 1 ? '' : 's'} returned`}</p>
+        <div className="results-actions">
+          <p className="help-text">{results.length === 0 ? 'No result items to display yet.' : `${results.length} item${results.length === 1 ? '' : 's'} returned`}</p>
+        </div>
       </div>
       {results.length === 0 ? (
         <div className="results-empty-state">
-          <p className="results-empty-state__title">Nothing to review yet</p>
-          <p className="help-text">Run the search to inspect saved paths, match scores, and preview crops here.</p>
+          <p className="results-empty-state__title">{hasNoResultsAfterRun ? 'No matches found' : 'Nothing to review yet'}</p>
+          <p className="help-text">
+            {hasNoResultsAfterRun
+              ? 'No matching faces were found in this run. Try lowering Threshold to make matching less strict, then run the search again.'
+              : 'Run the search to inspect saved paths, match scores, and preview crops here.'}
+          </p>
         </div>
       ) : (
         <ol className="result-list">

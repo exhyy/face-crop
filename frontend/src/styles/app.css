@@ -429,13 +429,107 @@ textarea:focus {
   color: var(--color-text-soft);
 }
 
-.target-preview__notice-text {
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: var(--color-text);
-  font-weight: 500;
+.target-preview__stack {
+  position: relative;
+  display: inline-block;
+  max-width: min(100%, 420px);
 }
 
+.candidate-preview {
+  display: grid;
+  gap: 14px;
+}
+
+.candidate-preview__stage {
+  display: grid;
+}
+
+.candidate-preview__frame {
+  max-width: min(100%, 520px);
+}
+
+.candidate-preview__meta {
+  display: grid;
+  gap: 6px;
+}
+
+.candidate-preview__filename {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.candidate-preview__thumbs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.candidate-preview__thumb {
+  flex: 0 0 auto;
+  width: 68px;
+  height: 68px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 252, 248, 0.96);
+}
+
+.candidate-preview__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.candidate-preview__thumb--active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(111, 82, 60, 0.14);
+}
+
+.setting-card--polished {
+  gap: 14px;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255, 253, 250, 0.98), rgba(249, 245, 239, 0.94));
+  border-color: rgba(88, 74, 62, 0.1);
+  box-shadow: 0 10px 24px rgba(35, 27, 22, 0.04);
+}
+
+.setting-card__intro {
+  display: grid;
+  gap: 6px;
+}
+
+.setting-card__eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-soft);
+}
+
+.setting-card__description,
+.setting-card__note {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.setting-card__description {
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.setting-card__note {
+  padding: 10px 12px;
+  border: 1px solid rgba(88, 74, 62, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 252, 248, 0.72);
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
 
 textarea {
   min-height: 120px;
@@ -496,8 +590,10 @@ textarea {
   align-items: flex-start;
 }
 
-.actions--quiet {
-  padding-top: 2px;
+.actions--form-inline {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .path-field-row {

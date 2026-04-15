@@ -1,43 +1,29 @@
-import type { ProcessResponse, ProcessStatus as ProcessStatusValue } from '../types/process'
-
-interface ProcessSummaryProps {
-  result: ProcessResponse | null
-  status: ProcessStatusValue
-}
-
-export function ProcessSummary({ result, status }: ProcessSummaryProps) {
+export function ProcessSummary() {
   return (
-    <section className="panel panel--summary">
+    <section className="panel panel--summary-help">
       <div className="panel__intro">
-        <p className="section-label">Run summary</p>
-        <h2>Latest output</h2>
-        <p className="help-text">A compact view of the current processing run and its saved results.</p>
+        <p className="section-label">How to use</p>
+        <h2>Face search guide</h2>
+        <p className="help-text">A quick guide for running a search and reviewing matches.</p>
       </div>
-      {result ? (
-        <div className="summary-grid">
-          <div className="summary-card">
-            <p className="summary-card__label">Status</p>
-            <p className="summary-card__value summary-card__value--text">{status}</p>
-          </div>
-          <div className="summary-card">
-            <p className="summary-card__label">Total images</p>
-            <p className="summary-card__value">{result.totalImages}</p>
-          </div>
-          <div className="summary-card">
-            <p className="summary-card__label">Detected faces</p>
-            <p className="summary-card__value">{result.detectedFaces}</p>
-          </div>
-          <div className="summary-card">
-            <p className="summary-card__label">Matched faces</p>
-            <p className="summary-card__value">{result.matchedFaces}</p>
-          </div>
+      <div className="summary-help-list">
+        <div className="summary-help-item">
+          <p className="summary-help-item__title">1. Choose a target image</p>
+          <p className="help-text">Pick the reference face you want to match in the current run.</p>
         </div>
-      ) : (
-        <div className="summary-empty-state">
-          <p className="summary-empty-state__title">No run results yet</p>
-          <p className="help-text">Start a processing run to see summary metrics and output details here.</p>
+        <div className="summary-help-item">
+          <p className="summary-help-item__title">2. Add candidate images</p>
+          <p className="help-text">Upload the batch to compare, then switch thumbnails to inspect each candidate.</p>
         </div>
-      )}
+        <div className="summary-help-item">
+          <p className="summary-help-item__title">3. Adjust settings if needed</p>
+          <p className="help-text">Lower Threshold for broader matches, or increase Padding for looser crops.</p>
+        </div>
+        <div className="summary-help-item">
+          <p className="summary-help-item__title">4. Run and review</p>
+          <p className="help-text">Start the search, review highlighted matches in the preview, then download crops when needed.</p>
+        </div>
+      </div>
     </section>
   )
 }

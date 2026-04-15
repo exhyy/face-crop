@@ -52,7 +52,7 @@ export function FaceSearchPage() {
           />
         </div>
         <aside className="layout-grid__secondary">
-          <ProcessSummary status={processFaces.status} result={processFaces.result} />
+          <ProcessSummary />
         </aside>
       </div>
     </main>

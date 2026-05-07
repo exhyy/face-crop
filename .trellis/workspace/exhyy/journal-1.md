@@ -624,3 +624,36 @@ Squared candidate face boxes and crops, then recorded the Trellis task artifacts
 ### Next Steps
 
 - None - task complete
+
+
+## Session 15: Trellis v0.5.4 Migration Session
+
+**Date**: 2026-05-07
+**Task**: Trellis v0.5.4 Migration Session
+**Branch**: `master`
+
+### Summary
+
+Applied trellis update --migrate to upgrade from legacy structure to v0.5.4. Verified migration correctness, cleaned up backup files, and committed the restructured project.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `deb8b5e` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
